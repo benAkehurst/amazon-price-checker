@@ -4,23 +4,85 @@ const Item = mongoose.model('Item');
 
 const puppeteer = require('puppeteer');
 
-exports.scrapePage = (req, res) => {
+exports.get_all_items = (req, res) => {
+  Item.find({}, (err, items) => {
+    if (err) {
+      res.send({
+        error: err,
+        message: 'No items fround',
+        code: 204
+      });
+    }
+    res.send({
+      message: 'All items returned',
+      data: items,
+      code: 200
+    });
+  });
+};
+
+exports.get_single_item = (req, res) => {
+  Item.findById(req.params.itemId, (err, item) => {
+    if (err) {
+      res.send({
+        error: err,
+        message: "Couldn't find item",
+        code: 400
+      });
+    }
+    res.send({
+      message: 'Item found',
+      data: item,
+      code: 200
+    });
+  });
+};
+
+exports.first_scrape = (req, res) => {
   let url = req.body.url;
   scraper(url)
     .then(data => {
       if (data) {
-        // Here I need to put the scraped data in the db
-        res.send({
-          msg: 'data scraped successfully',
-          data: data
+        let newItem = new Item({
+          name: data.title,
+          link: url,
+          imgUrl: data.imgUrl,
+          price: data.priceInt
         });
+        newItem.save((err, item) => {
+          if (err) {
+            res.send({
+              error: err,
+              message: "Couldn't create item in DB",
+              code: 400
+            });
+          };
+          res.status(201).json({
+            message: 'Item created',
+            success: true,
+            obj: item
+          });
+        })
       }
     })
     .catch(err => {
       res.send({
-        msg: 'Error - something went wrong scraping',
+        msg: 'Error - something went wrong scraping'
       });
     });
+};
+
+exports.update_item = (req, res) => {
+  // get item from db
+  // scrape again
+  // update entry
+  // save to db
+  // return to user
+};
+
+exports.delete_item = (req, res) => {
+  // find item in db
+  // move to deleted collection
 };
 
 let scraper = async url => {
