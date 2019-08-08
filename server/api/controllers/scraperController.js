@@ -11,7 +11,6 @@ exports.scrape_product = (req, res) => {
       console.log(err);
     }
     let result = docs;
-    console.log(result);
     if (result.length <= 0) {
       scraper(targetUrl)
         .then(data => {
