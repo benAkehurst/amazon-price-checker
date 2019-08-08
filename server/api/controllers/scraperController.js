@@ -4,6 +4,54 @@ const Item = mongoose.model('Item');
 
 const puppeteer = require('puppeteer');
 
+exports.scrape_product = (req, res) => {
+  let targetUrl = req.body.url;
+  Item.find({ link: targetUrl }, (err, docs) => {
+    if (err) {
+      console.log(err);
+    }
+    let result = docs;
+    console.log(result);
+    if (result.length <= 0) {
+      scraper(targetUrl)
+        .then(data => {
+          if (data) {
+            let newItem = new Item({
+              name: data.title,
+              link: targetUrl,
+              imgUrl: data.imgUrl,
+              price: data.priceInt
+            });
+            newItem.save((err, item) => {
+              if (err) {
+                res.send({
+                  error: err,
+                  message: "Couldn't create item in DB",
+                  code: 400
+                });
+              };
+              res.status(201).json({
+                message: 'Item created',
+                success: true,
+                obj: item
+              });
+            })
+          }
+        })
+        .catch(err => {
+          res.send({
+            msg: 'Error - something went wrong scraping'
+          });
+        });
+    }
+    if (result.length >= 1) {
+      res.send({
+        msg: 'Item exists in DB'
+      })
+    }
+  });
+};
+
 exports.get_all_items = (req, res) => {
   Item.find({}, (err, items) => {
     if (err) {
@@ -36,40 +84,6 @@ exports.get_single_item = (req, res) => {
       code: 200
     });
   });
-};
-
-exports.first_scrape = (req, res) => {
-  let url = req.body.url;
-  scraper(url)
-    .then(data => {
-      if (data) {
-        let newItem = new Item({
-          name: data.title,
-          link: url,
-          imgUrl: data.imgUrl,
-          price: data.priceInt
-        });
-        newItem.save((err, item) => {
-          if (err) {
-            res.send({
-              error: err,
-              message: "Couldn't create item in DB",
-              code: 400
-            });
-          };
-          res.status(201).json({
-            message: 'Item created',
-            success: true,
-            obj: item
-          });
-        })
-      }
-    })
-    .catch(err => {
-      res.send({
-        msg: 'Error - something went wrong scraping'
-      });
-    });
 };
 
 exports.update_item = (req, res) => {
