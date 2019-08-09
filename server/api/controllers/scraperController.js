@@ -1,58 +1,12 @@
 'use strict';
 const mongoose = require('mongoose');
-const Item = mongoose.model('Item');
+const SingleItem = mongoose.model('SingleItem');
+const Items = mongoose.model('Items');
 
 const puppeteer = require('puppeteer');
 
-exports.scrape_product = (req, res) => {
-  let targetUrl = req.body.url;
-  Item.find({ link: targetUrl }, (err, docs) => {
-    if (err) {
-      console.log(err);
-    }
-    let result = docs;
-    if (result.length <= 0) {
-      scraper(targetUrl)
-        .then(data => {
-          if (data) {
-            let newItem = new Item({
-              name: data.title,
-              link: targetUrl,
-              imgUrl: data.imgUrl,
-              price: data.priceInt
-            });
-            newItem.save((err, item) => {
-              if (err) {
-                res.send({
-                  error: err,
-                  message: "Couldn't create item in DB",
-                  code: 400
-                });
-              };
-              res.status(201).json({
-                message: 'Item created',
-                success: true,
-                obj: item
-              });
-            })
-          }
-        })
-        .catch(err => {
-          res.send({
-            msg: 'Error - something went wrong scraping'
-          });
-        });
-    }
-    if (result.length >= 1) {
-      res.send({
-        msg: 'Item exists in DB'
-      })
-    }
-  });
-};
-
 exports.get_all_items = (req, res) => {
-  Item.find({}, (err, items) => {
+  SingleItem.find({}, (err, items) => {
     if (err) {
       res.send({
         error: err,
@@ -69,7 +23,7 @@ exports.get_all_items = (req, res) => {
 };
 
 exports.get_single_item = (req, res) => {
-  Item.findById(req.params.itemId, (err, item) => {
+  SingleItem.findById(req.params.itemId, (err, item) => {
     if (err) {
       res.send({
         error: err,
@@ -85,12 +39,83 @@ exports.get_single_item = (req, res) => {
   });
 };
 
+exports.first_scrape = (req, res) => {
+  let url = req.body.url;
+  scraper(url)
+    .then(data => {
+      if (data) {
+        let newItem = new SingleItem({
+          name: data.title,
+          link: url,
+          imgUrl: data.imgUrl,
+          price: data.priceInt
+        });
+        newItem.save((err, item) => {
+          if (err) {
+            res.send({
+              error: err,
+              message: "Couldn't create item in DB",
+              code: 400
+            });
+          }
+          let itemCollection = new Items({
+            uid: item._id
+          });
+          itemCollection.save();
+          res.status(201).json({
+            message: 'Item created',
+            success: true,
+            obj: item
+          });
+        });
+      }
+    })
+    .catch(err => {
+      res.send({
+        msg: 'Error - something went wrong scraping'
+      });
+    });
+};
+
 exports.update_item = (req, res) => {
-  // get item from db
-  // scrape again
-  // update entry
-  // save to db
-  // return to user
+  let id = req.body.id;
+  console.log(id);
+  SingleItem.findById(id, (err, item) => {
+    scraper(item.link)
+      .then(data => {
+        if (data) {
+          let newObj = {
+            tite: data.title,
+            price: data.priceInt,
+            date: Date.now().toString()
+          };
+          SingleItem.findOneAndUpdate(
+            { _id: req.body.id },
+            { $push: { pastPrices: newObj } },
+            (err, result) => {
+              if (err) {
+                res.send({
+                  error: err,
+                  message: "Couldn't update item in DB",
+                  success: false,
+                  code: 400
+                });
+              }
+              res.status(200).json({
+                message: 'Item updated',
+                success: true,
+                obj: result
+              });
+            }
+          );
+        }
+      })
+      .catch(err => {
+        res.send({
+          msg: 'Error - something went wrong scraping'
+        });
+      });
+  });
 };
 
 exports.delete_item = (req, res) => {
@@ -100,7 +125,6 @@ exports.delete_item = (req, res) => {
 
 let scraper = async url => {
   console.log('Accessing Amazon to fetch data');
-
   const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
   console.log('Going to chosen URL');

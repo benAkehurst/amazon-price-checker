@@ -7,7 +7,7 @@ module.exports = app => {
    */
   app.route('/api/scrapeData').get(scraperController.get_all_items);
   app.route('/api/scrapeData/:itemId').get(scraperController.get_single_item);
-  app.route('/api/scrapeProduct').post(scraperController.scrape_product);
-  app.route('/api/updateScrapeItem/:itemId').patch(scraperController.update_item);
+  app.route('/api/initalScrapeOfItem').post(scraperController.first_scrape);
+  app.route('/api/updateScrapeItem').post(scraperController.update_item);
   app.route('/api/removeScrapeItem/:itemId').delete(scraperController.delete_item);
 };

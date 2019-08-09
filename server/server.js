@@ -7,7 +7,8 @@ const cors = require('cors');
 
 // Models Imports
 const User = require('./api/models/userModel');
-const Item = require('./api/models/itemModel');
+const SingleItem = require('./api/models/singleItemModel');
+const Items = require('./api/models/itemsModel');
 
 // Init Express
 const app = express();
