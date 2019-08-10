@@ -24,13 +24,14 @@ const UserSchema = new Schema({
     default: Date.now
   },
   status: {
-    type: [{
-      type: String,
-      enum: ['pending', 'aproved', 'deleted']
-    }],
+    type: [
+      {
+        type: String,
+        enum: ['pending', 'aproved', 'deleted']
+      }
+    ],
     default: ['aproved']
   }
 });
-
 
 module.exports = mongoose.model('User', UserSchema);
