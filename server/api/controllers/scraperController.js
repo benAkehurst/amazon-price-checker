@@ -23,11 +23,12 @@ exports.get_all_items = (req, res) => {
 };
 
 exports.get_single_item = (req, res) => {
-  SingleItem.findById(req.params.itemId, (err, item) => {
+  let id = req.body.id;
+  SingleItem.findById(id, (err, item) => {
     if (err) {
       res.send({
         error: err,
-        message: "Couldn't find item",
+        message: "Couldn't find the requested item",
         code: 400
       });
     }
@@ -54,7 +55,7 @@ exports.first_scrape = (req, res) => {
           if (err) {
             res.send({
               error: err,
-              message: "Couldn't create item in DB",
+              message: "Couldn't create item in database",
               code: 400
             });
           }
@@ -63,7 +64,7 @@ exports.first_scrape = (req, res) => {
           });
           itemCollection.save();
           res.status(201).json({
-            message: 'Item created',
+            message: 'Item found and saved in database',
             success: true,
             obj: item
           });
@@ -72,14 +73,14 @@ exports.first_scrape = (req, res) => {
     })
     .catch(err => {
       res.send({
-        msg: 'Error - something went wrong scraping'
+        err: err,
+        msg: 'Error - something went wrong scraping the item'
       });
     });
 };
 
 exports.update_item = (req, res) => {
   let id = req.body.id;
-  console.log(id);
   SingleItem.findById(id, (err, item) => {
     scraper(item.link)
       .then(data => {
@@ -96,13 +97,13 @@ exports.update_item = (req, res) => {
               if (err) {
                 res.send({
                   error: err,
-                  message: "Couldn't update item in DB",
+                  message: "Couldn't update item in database",
                   success: false,
                   code: 400
                 });
               }
               res.status(200).json({
-                message: 'Item updated',
+                message: 'Item updated in database',
                 success: true,
                 obj: result
               });
@@ -112,7 +113,8 @@ exports.update_item = (req, res) => {
       })
       .catch(err => {
         res.send({
-          msg: 'Error - something went wrong scraping'
+          err: err,
+          msg: 'Error - something went wrong scraping the item'
         });
       });
   });
@@ -124,13 +126,13 @@ exports.delete_item = (req, res) => {
 };
 
 let scraper = async url => {
-  console.log('Accessing Amazon to fetch data');
+  console.log('Accessing Amazon to fetch item data');
   const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
   console.log('Going to chosen URL');
   await page.goto(url);
   await page.waitFor(1000);
-  console.log('Scraping information');
+  console.log('At chosen page \n Starting scrape');
   const result = await page.evaluate(() => {
     let title = document.querySelector('#productTitle').innerText;
     let imgUrl = document.querySelector('#imgTagWrapperId > img').src;
