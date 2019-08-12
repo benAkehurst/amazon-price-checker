@@ -9,6 +9,7 @@ const cors = require('cors');
 const User = require('./api/models/userModel');
 const SingleItem = require('./api/models/singleItemModel');
 const Items = require('./api/models/itemsModel');
+const Deleted = require('./api/models/deletedModel');
 
 // Init Express
 const app = express();

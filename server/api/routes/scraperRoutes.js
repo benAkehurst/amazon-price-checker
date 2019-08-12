@@ -9,5 +9,5 @@ module.exports = app => {
   app.route('/api/scrape-single-item').post(scraperController.get_single_item);
   app.route('/api/initial-add-product').post(scraperController.first_scrape);
   app.route('/api/updateScrapeItem').post(scraperController.update_item);
-  app.route('/api/removeScrapeItem/:itemId').delete(scraperController.delete_item);
+  app.route('/api/remove-scraped-item').post(scraperController.delete_item);
 };

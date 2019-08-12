@@ -2,6 +2,7 @@
 const mongoose = require('mongoose');
 const SingleItem = mongoose.model('SingleItem');
 const Items = mongoose.model('Items');
+const Deleted = mongoose.model('Deleted');
 
 const puppeteer = require('puppeteer');
 
@@ -121,8 +122,42 @@ exports.update_item = (req, res) => {
 };
 
 exports.delete_item = (req, res) => {
-  // find item in db
-  // move to deleted collection
+  let id = req.body.id;
+  SingleItem.findById(id, (err, document) => {
+    if (err) {
+      res.send({
+        error: err,
+        message: "Couldn't find the requested item",
+        code: 400
+      });
+    }
+    let newItem = new Deleted({
+      item: document
+    });
+    newItem.save((err, item) => {
+      if (err) {
+        res.send({
+          error: err,
+          message: "Couldn't find the requested item",
+          code: 400
+        });
+      }
+    });
+  })
+  SingleItem.findByIdAndRemove(id, (err, success) => {
+    if (err) {
+      res.send({
+        error: err,
+        message: "Couldn't find the requested item",
+        code: 400
+      });
+    }
+    res.send({
+      message: 'Item deleted from database',
+      success: true,
+      obj: success
+    });
+  })
 };
 
 let scraper = async url => {
