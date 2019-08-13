@@ -83,43 +83,14 @@ exports.first_scrape = (req, res) => {
 
 exports.update_item = (req, res) => {
   let id = req.body.id;
-  SingleItem.findById(id, (err, item) => {
-    scraper(item.link)
-      .then(data => {
-        if (data) {
-          let newObj = {
-            tite: data.title,
-            price: data.priceInt,
-            date: Date.now().toString()
-          };
-          SingleItem.findOneAndUpdate(
-            { _id: req.body.id },
-            { $push: { pastPrices: newObj } },
-            (err, result) => {
-              if (err) {
-                res.send({
-                  error: err,
-                  message: "Couldn't update item in database",
-                  success: false,
-                  code: 400
-                });
-              }
-              res.status(200).json({
-                message: 'Item updated in database',
-                success: true,
-                obj: result
-              });
-            }
-          );
-        }
-      })
-      .catch(err => {
-        res.send({
-          err: err,
-          msg: 'Error - something went wrong scraping the item'
-        });
-      });
-  });
+  let updatePrice = cron_update_item(id);
+  if (updatePrice) {
+    res.send({
+      success: true,
+      message: 'Item updated successfully',
+      data: updatePrice
+    });
+  }
 };
 
 exports.delete_item = (req, res) => {
@@ -144,7 +115,7 @@ exports.delete_item = (req, res) => {
         });
       }
     });
-  })
+  });
   SingleItem.findByIdAndRemove(id, (err, success) => {
     if (err) {
       res.send({
@@ -158,7 +129,7 @@ exports.delete_item = (req, res) => {
       success: true,
       obj: success
     });
-  })
+  });
 };
 
 let scraper = async url => {
@@ -184,9 +155,9 @@ let scraper = async url => {
   return result;
 };
 
-function cron_update_item(id) {
+let cron_update_item = async id => {
   let itemId = id;
-  SingleItem.findById(itemId, (err, item) => {
+  await SingleItem.findById(itemId, (err, item) => {
     scraper(item.link)
       .then(data => {
         if (data) {
@@ -200,21 +171,28 @@ function cron_update_item(id) {
             { $push: { pastPrices: newObj } },
             (err, result) => {
               if (err) {
-                console.log('Error');
+                return {
+                  success: false,
+                  error: err
+                };
               }
-              console.log('Successfully scraped new price');
+              return { result };
             }
           );
         }
       })
       .catch(err => {
-        console.log('Big big error', err);
+        return {
+          success: false,
+          message: 'Major error',
+          error: err
+        };
       });
   });
-}
+};
 
-cron.schedule('* * * * *', () => {
-  console.log('running a task every minute');
+cron.schedule('1 * * * *', () => {
+  console.log('Scraping item');
   cron_update_item('5d4ea96e597c8aa5e1912809');
 });
 
