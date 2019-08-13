@@ -5,6 +5,7 @@ const Items = mongoose.model('Items');
 const Deleted = mongoose.model('Deleted');
 
 const puppeteer = require('puppeteer');
+const cron = require('node-cron');
 
 exports.get_all_items = (req, res) => {
   SingleItem.find({}, (err, items) => {
@@ -182,6 +183,40 @@ let scraper = async url => {
   browser.close();
   return result;
 };
+
+function cron_update_item(id) {
+  let itemId = id;
+  SingleItem.findById(itemId, (err, item) => {
+    scraper(item.link)
+      .then(data => {
+        if (data) {
+          let newObj = {
+            tite: data.title,
+            price: data.priceInt,
+            date: Date.now().toString()
+          };
+          SingleItem.findOneAndUpdate(
+            { _id: itemId },
+            { $push: { pastPrices: newObj } },
+            (err, result) => {
+              if (err) {
+                console.log('Error');
+              }
+              console.log('Successfully scraped new price');
+            }
+          );
+        }
+      })
+      .catch(err => {
+        console.log('Big big error', err);
+      });
+  });
+}
+
+cron.schedule('* * * * *', () => {
+  console.log('running a task every minute');
+  cron_update_item('5d4ea96e597c8aa5e1912809');
+});
 
 /**
  * Puppeteer script written by following:
