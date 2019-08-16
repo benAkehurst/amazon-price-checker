@@ -25,7 +25,8 @@ POST - http://localhost:3000/api/initial-add-product
 Body:
 {
   "url": "amazon url",
-  "follow": "boolean value"
+  "follow": boolean,
+  "targetPrice": number
 }
 ```
 
@@ -35,7 +36,8 @@ Body:
 POST - http://localhost:3000/api/update-scraped-item
 Body:
 {
-  "id":"single object _id"
+  "id": "single object _id",
+  "targetPrice": number
 }
 ```
 

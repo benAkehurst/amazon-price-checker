@@ -32,6 +32,7 @@
     "lodash": "^4.17.15",
     "mongoose": "^5.4.11",
     "node-cron": "^2.0.3",
+    "nodemailer": "^6.3.0",
     "puppeteer": "^1.19.0"
   }
 }

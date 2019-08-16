@@ -4,9 +4,10 @@ const SingleItem = mongoose.model('SingleItem');
 const Items = mongoose.model('Items');
 const Deleted = mongoose.model('Deleted');
 
+const fs = require('fs');
 const puppeteer = require('puppeteer');
 const cron = require('node-cron');
-const fs = require('fs');
+const nodemailer = require('nodemailer');
 
 exports.get_all_items = (req, res) => {
   SingleItem.find({}, (err, items) => {
@@ -69,6 +70,7 @@ exports.get_all_followed_items = (req, res) => {
 exports.first_scrape = (req, res) => {
   let url = req.body.url;
   let follow = req.body.follow;
+  let target = req.body.targetPrice;
   let checkUrl = validURL(url);
   if (!checkUrl) {
     res.send({
@@ -88,7 +90,8 @@ exports.first_scrape = (req, res) => {
           link: url,
           imgUrl: data.imgUrl,
           price: data.priceInt,
-          following: follow
+          following: follow,
+          targetPrice: target
         });
         newItem.save((err, item) => {
           if (err) {
@@ -120,12 +123,12 @@ exports.first_scrape = (req, res) => {
 
 exports.update_item = (req, res) => {
   let id = req.body.id;
-  let updatePrice = cron_update_item(id);
+  let targetPrice = req.body.targetPrice;
+  let updatePrice = cron_update_item(id, targetPrice);
   if (updatePrice) {
     res.send({
       success: true,
-      message: 'Item updated successfully',
-      data: updatePrice
+      message: 'Item updated successfully'
     });
   }
 };
@@ -176,7 +179,7 @@ let scraper = async url => {
   console.log('Going to chosen URL');
   await page.goto(url);
   await page.waitFor(1000);
-  console.log('At chosen page \n Starting scrape');
+  console.log('At chosen page and starting scrape');
   const result = await page.evaluate(() => {
     let title = document.querySelector('#productTitle').innerText;
     let imgUrl = document.querySelector('#imgTagWrapperId > img').src;
@@ -215,12 +218,12 @@ cron.schedule('*/59 * * * *', () => {
     }
     followedItems.forEach(e => {
       console.log('Updating');
-      cron_update_item(e._id);
+      cron_update_item(e._id, e.targetPrice);
     });
   });
 });
 
-let cron_update_item = async id => {
+let cron_update_item = async (id, targetPrice) => {
   let itemId = id;
   await SingleItem.findById(itemId, (err, item) => {
     scraper(item.link)
@@ -240,6 +243,9 @@ let cron_update_item = async id => {
                   success: false,
                   error: err
                 };
+              }
+              if (newObj.price < targetPrice) {
+                sendEmail(newObj);
               }
               let log = {
                 msg: `Cron Job Run`,
@@ -265,7 +271,29 @@ let cron_update_item = async id => {
   });
 };
 
-// send email function
+function sendEmail(result) {
+  const mailOptions = {
+    from: process.env.GMAIL_LOGIN,
+    to: process.env.GMAIL_LOGIN,
+    subject: `AMAZON PRICE TRACK - ${result.title} - PRICE: ${result.priceInt}`,
+    html: `<p>The ${result.title} you wanted to buy is now ${
+      result.priceInt
+    }! Go buy it!!!></p>`
+  };
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.GMAIL_LOGIN,
+      pass: process.env.GMAIL_PASSWORD
+    }
+  });
+  transporter.sendMail(mailOptions, (err, info) => {
+    if (err) {
+      console.log(err);
+    }
+    console.log('Email Sent Successfully');
+  });
+}
 
 /**
  * Puppeteer script written by following:
