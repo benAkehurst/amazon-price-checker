@@ -15,6 +15,9 @@ const SingleItemSchema = new Schema({
   price: {
     type: Number
   },
+  targetPrice: {
+    type: Number
+  },
   following: {
     type: Boolean
   },
