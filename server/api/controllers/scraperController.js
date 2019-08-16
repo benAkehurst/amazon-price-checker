@@ -234,9 +234,28 @@ function validURL(str) {
   return false;
 }
 
-cron.schedule('1 * * * *', () => {
+cron.schedule('*/59 * * * *', () => {
+  SingleItem.find({}, (err, items) => {
+    let followedItems = [];
+    items.forEach(e => {
+      if (e.following === true) {
+        followedItems.push(e);
+      }
+    });
+    if (err) {
+      console.log({
+        error: err,
+        msg: 'Failed to update item'
+      });
+    }
+    if (followedItems.length > 1) {
+      followedItems.forEach(e => {
+        console.log('Updating');
+        cron_update_item(e._id);
+      });
+    }
+  });
   console.log('Scraping item');
-  cron_update_item('5d4ea96e597c8aa5e1912809');
 });
 
 /**
