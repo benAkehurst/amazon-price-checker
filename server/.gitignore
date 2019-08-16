@@ -33,4 +33,4 @@ $RECYCLE.BIN/
 Thumbs.db
 
 .env
-./server/middlewares
+./middlewares/config.js
