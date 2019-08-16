@@ -44,6 +44,14 @@ exports.get_single_item = (req, res) => {
 
 exports.first_scrape = (req, res) => {
   let url = req.body.url;
+  let checkUrl = validURL(url);
+  if (!checkUrl) {
+    res.send({
+      msg: 'You have provided a bad url',
+      success: false
+    });
+    return;
+  }
   scraper(url)
     .then(data => {
       if (data) {
@@ -195,6 +203,13 @@ cron.schedule('1 * * * *', () => {
   console.log('Scraping item');
   cron_update_item('5d4ea96e597c8aa5e1912809');
 });
+
+function validURL(str) {
+  if (str.indexOf('amazon') > -1) {
+    return true;
+  }
+  return false;
+}
 
 /**
  * Puppeteer script written by following:
