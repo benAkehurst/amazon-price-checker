@@ -41,7 +41,7 @@ Body:
 ### Removes the item from the items database, and adds it to a deleted collection
 
 ```
-POST - http://localhost:3000/api/update-scraped-item
+POST - http://localhost:3000/api/remove-scraped-item
 Body:
 {
   "id":"single object _id"
