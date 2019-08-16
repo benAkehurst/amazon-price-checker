@@ -1,10 +1,9 @@
 {
-  "name": "nodejs-api-server",
+  "name": "amazon-price-checker-server",
   "version": "1.1.0",
-  "description": "boilerplate nodejs/mongodb server database",
-  "main": "index.js",
+  "description": "",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon server.js",
     "dev": "node server",
     "reset:modules": "rm -rf node_modules && npm i",
@@ -12,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/benAkehurst/nodejs-api-server.git"
+    "url": "git+https://github.com/benAkehurst/amazon-price-checker.git"
   },
   "author": "Ben Akehurst",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/benAkehurst/nodejs-api-server/issues"
   },
-  "homepage": "https://github.com/benAkehurst/nodejs-api-server#readme",
+  "homepage": "https://github.com/benAkehurst/amazon-price-checker/tree/master/server#amazon-price-checker-nodejs-api-server",
   "devDependencies": {
     "nodemon": "^1.18.10"
   },

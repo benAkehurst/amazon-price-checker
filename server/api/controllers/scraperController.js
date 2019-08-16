@@ -6,6 +6,7 @@ const Deleted = mongoose.model('Deleted');
 
 const puppeteer = require('puppeteer');
 const cron = require('node-cron');
+const fs = require('fs');
 
 exports.get_all_items = (req, res) => {
   SingleItem.find({}, (err, items) => {
@@ -191,42 +192,6 @@ let scraper = async url => {
   return result;
 };
 
-let cron_update_item = async id => {
-  let itemId = id;
-  await SingleItem.findById(itemId, (err, item) => {
-    scraper(item.link)
-      .then(data => {
-        if (data) {
-          let newObj = {
-            tite: data.title,
-            price: data.priceInt,
-            date: Date.now().toString()
-          };
-          SingleItem.findOneAndUpdate(
-            { _id: itemId },
-            { $push: { pastPrices: newObj } },
-            (err, result) => {
-              if (err) {
-                return {
-                  success: false,
-                  error: err
-                };
-              }
-              return { result };
-            }
-          );
-        }
-      })
-      .catch(err => {
-        return {
-          success: false,
-          message: 'Major error',
-          error: err
-        };
-      });
-  });
-};
-
 function validURL(str) {
   if (str.indexOf('amazon') > -1) {
     return true;
@@ -248,15 +213,59 @@ cron.schedule('*/59 * * * *', () => {
         msg: 'Failed to update item'
       });
     }
-    if (followedItems.length > 1) {
-      followedItems.forEach(e => {
-        console.log('Updating');
-        cron_update_item(e._id);
-      });
-    }
+    followedItems.forEach(e => {
+      console.log('Updating');
+      cron_update_item(e._id);
+    });
   });
-  console.log('Scraping item');
 });
+
+let cron_update_item = async id => {
+  let itemId = id;
+  await SingleItem.findById(itemId, (err, item) => {
+    scraper(item.link)
+      .then(data => {
+        if (data) {
+          let newObj = {
+            tite: data.title,
+            price: data.priceInt,
+            date: Date.now().toString()
+          };
+          SingleItem.findOneAndUpdate(
+            { _id: itemId },
+            { $push: { pastPrices: newObj } },
+            (err, result) => {
+              if (err) {
+                return {
+                  success: false,
+                  error: err
+                };
+              }
+              let log = {
+                msg: `Cron Job Run`,
+                time: new Date()
+              };
+              console.log('Scraping item');
+              fs.writeFileSync('./logs/cron.json', JSON.stringify(log), {
+                encoding: 'utf8',
+                flag: 'a'
+              });
+              return;
+            }
+          );
+        }
+      })
+      .catch(err => {
+        return {
+          success: false,
+          message: 'Major error',
+          error: err
+        };
+      });
+  });
+};
+
+// send email function
 
 /**
  * Puppeteer script written by following:
