@@ -24,7 +24,8 @@ Body:
 POST - http://localhost:3000/api/initial-add-product
 Body:
 {
-  "url": "amazon url"
+  "url": "amazon url",
+  "follow": "boolean value"
 }
 ```
 

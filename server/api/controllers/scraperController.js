@@ -42,8 +42,32 @@ exports.get_single_item = (req, res) => {
   });
 };
 
+exports.get_all_followed_items = (req, res) => {
+  SingleItem.find({}, (err, items) => {
+    let followedItems = [];
+    items.forEach(e => {
+      if (e.following === true) {
+        followedItems.push(e);
+      }
+    });
+    if (err) {
+      res.send({
+        msg: 'No followed items',
+        success: false,
+        error: err
+      });
+    }
+    res.send({
+      msg: 'Followed Items',
+      success: true,
+      data: followedItems
+    });
+  });
+};
+
 exports.first_scrape = (req, res) => {
   let url = req.body.url;
+  let follow = req.body.follow;
   let checkUrl = validURL(url);
   if (!checkUrl) {
     res.send({
@@ -52,6 +76,9 @@ exports.first_scrape = (req, res) => {
     });
     return;
   }
+  if (follow === null) {
+    follow = false;
+  }
   scraper(url)
     .then(data => {
       if (data) {
@@ -59,7 +86,8 @@ exports.first_scrape = (req, res) => {
           name: data.title,
           link: url,
           imgUrl: data.imgUrl,
-          price: data.priceInt
+          price: data.priceInt,
+          following: follow
         });
         newItem.save((err, item) => {
           if (err) {
@@ -199,17 +227,17 @@ let cron_update_item = async id => {
   });
 };
 
-cron.schedule('1 * * * *', () => {
-  console.log('Scraping item');
-  cron_update_item('5d4ea96e597c8aa5e1912809');
-});
-
 function validURL(str) {
   if (str.indexOf('amazon') > -1) {
     return true;
   }
   return false;
 }
+
+cron.schedule('1 * * * *', () => {
+  console.log('Scraping item');
+  cron_update_item('5d4ea96e597c8aa5e1912809');
+});
 
 /**
  * Puppeteer script written by following:
