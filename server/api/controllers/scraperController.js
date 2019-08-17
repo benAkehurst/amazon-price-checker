@@ -202,7 +202,7 @@ function validURL(str) {
   return false;
 }
 
-cron.schedule('*/59 * * * *', () => {
+cron.schedule('0 * * * *', () => {
   SingleItem.find({}, (err, items) => {
     let followedItems = [];
     items.forEach(e => {
