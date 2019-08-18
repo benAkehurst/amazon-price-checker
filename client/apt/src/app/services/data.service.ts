@@ -13,18 +13,27 @@ export class DataService {
   private ApiPrefix = 'http://localhost:3000/';
   private appRoutes = {
     getAll: 'api/get-all-product-data',
+    getSingleItem: 'api/fetch-single-item',
     getFollowed: 'api/get-all-followed-items',
     initAddProduct: 'api/initial-add-product',
     updateItem: 'api/update-scraped-item',
     removeItem: 'api/remove-scraped-item'
   };
 
+  public selectedItem: IItem;
+  public selectedPage: string = '';
+
   constructor(private http: HttpClient) {}
 
   public getAllItems(): Observable<any> {
-    console.log(this.ApiPrefix + this.appRoutes.getAll);
     return this.http
       .get(this.ApiPrefix + this.appRoutes.getAll);
+  }
+
+  public getSingleItem(_id: string): Observable<any> {
+    return this.http.post(
+      this.ApiPrefix + this.appRoutes.getSingleItem, {id: _id}, {headers: this.headers}
+    );
   }
 
   public addItemsToLocalStorage(items: IItem[]) {

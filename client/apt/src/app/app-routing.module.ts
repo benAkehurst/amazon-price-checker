@@ -14,7 +14,8 @@ const routes: Routes = [
   {
     path: 'items',
     loadChildren: () => import('./items/items.module').then(m => m.ItemsPageModule)
-  }
+  },
+  { path: 'single-item/:id', loadChildren: './single-item/single-item.module#SingleItemPageModule' }
 ];
 
 @NgModule({
