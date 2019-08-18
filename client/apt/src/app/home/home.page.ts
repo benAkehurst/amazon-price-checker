@@ -24,15 +24,14 @@ export class HomePage implements OnInit {
     this.getAllItems();
   }
 
-  ionViewWillEnter() {
-    this.isLoading = true;
-    this.getAllItems();
-  }
-
   /**
    * Fetchs all the items in the Database
    */
   public getAllItems() {
+    if (this.dataService.getItemsFromLocalStorage()) {
+      this.loadedItems = this.dataService.getItemsFromLocalStorage();
+      this.isLoading = false;
+    }
     this.dataService.getAllItems().subscribe(res => {
       if (res.success === false) {
         this.errorMessage = res.message;
@@ -43,7 +42,6 @@ export class HomePage implements OnInit {
         this.isLoading = false;
       }
     });
-    console.log(this.loadedItems);
   }
 
   /**

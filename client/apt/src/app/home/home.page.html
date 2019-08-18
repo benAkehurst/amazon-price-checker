@@ -25,9 +25,6 @@
       <ion-col size-md="12" offset-md="0" text-center *ngIf="isLoading">
         <ion-spinner color="primary"></ion-spinner>
       </ion-col>
-      <ion-col size-md="12" offset-md="0" *ngIf="!isLoading && (!loadedItems || loadedItems.length <= 0)" text-center>
-        <p>No items found.</p>
-      </ion-col>
       <ion-col size-md="12" offset-md="0" *ngIf="!isLoading && loadedItems && loadedItems.length > 0" text-center>
         <h1>All Items</h1>
         <ion-list>
