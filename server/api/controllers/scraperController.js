@@ -10,18 +10,21 @@ const cron = require('node-cron');
 const nodemailer = require('nodemailer');
 
 exports.get_all_items = (req, res) => {
+  console.log('Get All Items Called');
   SingleItem.find({}, (err, items) => {
     if (err) {
       res.send({
         error: err,
         message: 'No items fround',
-        code: 204
+        code: 204,
+        success: false
       });
     }
     res.send({
       message: 'All items returned',
       data: items,
-      code: 200
+      code: 200,
+      success: true
     });
   });
 };
