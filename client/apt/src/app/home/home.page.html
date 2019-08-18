@@ -17,13 +17,13 @@
       </ion-col>
     </ion-row>
     <ion-row>
-      <ion-col size-md="6" offset-md="3" text-center *ngIf="isLoading">
+      <ion-col size-md="12" offset-md="0" text-center *ngIf="isLoading">
         <ion-spinner color="primary"></ion-spinner>
       </ion-col>
-      <ion-col size-md="6" offset-md="3" *ngIf="!isLoading && (!loadedItems || loadedItems.length <= 0)" text-center>
+      <ion-col size-md="12" offset-md="0" *ngIf="!isLoading && (!loadedItems || loadedItems.length <= 0)" text-center>
         <p>No items found.</p>
       </ion-col>
-      <ion-col size-md="6" offset-md="3" *ngIf="!isLoading && loadedItems && loadedItems.length > 0">
+      <ion-col size-md="12" offset-md="0" *ngIf="!isLoading && loadedItems && loadedItems.length > 0">
         <ion-list>
           <ion-item *ngFor="let item of loadedItems" (click)="goToItemPage(item)" class="single-item">
             <ion-thumbnail slot="start">
