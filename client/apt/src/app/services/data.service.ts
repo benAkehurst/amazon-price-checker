@@ -21,7 +21,7 @@ export class DataService {
 
   public newItem: INewItem;
   public selectedItem: IItem;
-  public selectedPage: string;
+  public selectedPage = '';
 
   constructor(private http: HttpClient) {}
 
@@ -33,10 +33,10 @@ export class DataService {
     return this.http.get(this.ApiPrefix + this.appRoutes.getFollowed);
   }
 
-  public getSingleItem(selectedItem: IItem): Observable<any> {
+  public getSingleItem(_id: string): Observable<any> {
     return this.http.post(
       this.ApiPrefix + this.appRoutes.getSingleItem,
-      { id: selectedItem._id },
+      { id: _id },
       { headers: this.headers }
     );
   }
