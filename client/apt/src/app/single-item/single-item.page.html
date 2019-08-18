@@ -27,14 +27,27 @@
           </ion-card-header>
           <ion-card-content>
             <ion-img [src]="singleItem.imgUrl"></ion-img>
-          </ion-card-content>
-        </ion-card>
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>{{singleItem.name}}</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <ion-img [src]="singleItem.imgUrl"></ion-img>
+            <h3>Current Price: {{singleItem.price}}</h3>
+            <h3>Target Price: {{singleItem.targetPrice}}</h3>
+            <h3>Added to tracker: {{singleItem.created_date | date}}</h3>
+            <h3>Lowest Tracked Price:</h3>
+              <p>Price: {{lowestTrackedPrice.price}}</p>
+              <p>When? {{lowestTrackedPrice.date | date}}</p>
+            <ion-list>
+              <ion-radio-group>
+                <ion-list-header>
+                  <ion-label>Following?</ion-label>
+                </ion-list-header>
+                <ion-item>
+                  <ion-label>Yes</ion-label>
+                  <ion-radio slot="start" value="yes" [checked]="checkFollowingDefault(singleItem)"></ion-radio>
+                </ion-item>
+                <ion-item>
+                  <ion-label>No</ion-label>
+                  <ion-radio slot="start" value="no"></ion-radio>
+                </ion-item>
+              </ion-radio-group>
+            </ion-list>
           </ion-card-content>
         </ion-card>
       </ion-col>

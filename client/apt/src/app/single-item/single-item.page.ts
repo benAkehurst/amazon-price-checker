@@ -12,6 +12,7 @@ import { IItem } from '../interfaces/item.interface';
 export class SingleItemPage implements OnInit {
   public itemId: string = '';
   public singleItem: IItem;
+  public lowestPrice: any;
   public isLoading: boolean = false;
 
   constructor(
@@ -28,15 +29,41 @@ export class SingleItemPage implements OnInit {
     this.route.paramMap.subscribe(params => {
       this.itemId = params.get('id');
     });
+
     if (this.dataService.selectedPage === '') {
       this.dataService.getSingleItem(this.itemId).subscribe(res => {
         this.singleItem = res.data;
+        this.lowestTrackedPrice();
+        console.log(this.lowestTrackedPrice);
         this.isLoading = false;
+        console.log(this.singleItem);
       });
     }
+
     if (this.dataService.selectedItem) {
       this.singleItem = this.dataService.selectedItem;
+      this.lowestTrackedPrice();
+      console.log(this.lowestTrackedPrice);
       this.isLoading = false;
+      console.log(this.singleItem);
+    }
+  }
+
+  public lowestTrackedPrice() {
+    const arr = this.singleItem.pastPrices;
+    Math.min.apply(
+      Math,
+      arr.map(o => {
+        this.lowestTrackedPrice = o;
+      })
+    );
+  }
+
+  public checkFollowingDefault(item: IItem): boolean {
+    if (item.following) {
+      return true;
+    } else {
+      return false;
     }
   }
 }
