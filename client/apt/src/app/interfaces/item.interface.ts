@@ -6,9 +6,9 @@ export class IItem {
   public price: number;
   public targetPrice: number;
   public following: boolean;
-  public pastPrices: Array<object>;
-  public createdDate: Date;
-  public updatedDate: Date;
+  public pastPrices: any;
+  public created_date: Date;
+  public updated_date: Date;
 }
 
 export class INewItem {
