@@ -3,6 +3,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { IItem, INewItem } from "../interfaces/item.interface";
+
 @Injectable({
   providedIn: 'root'
 })
@@ -23,5 +25,23 @@ export class DataService {
     console.log(this.ApiPrefix + this.appRoutes.getAll);
     return this.http
       .get(this.ApiPrefix + this.appRoutes.getAll);
+  }
+
+  public addItemsToLocalStorage(items: IItem[]) {
+    if (localStorage.getItem('items')) {
+      localStorage.removeItem('items');
+    }
+    localStorage.setItem('items', JSON.stringify(items));
+  }
+
+  public getItemsFromLocalStorage() {
+     if (localStorage.getItem('items')) {
+       return JSON.parse(localStorage.getItem('items'));
+     }
+     return false;
+  }
+
+  public clearLocalStorage() {
+    localStorage.clear();
   }
 }
