@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-
 import { DataService } from './../services/data.service';
+import { IItem } from '../interfaces/item.interface';
 
 @Component({
   selector: 'app-home',
@@ -8,7 +8,7 @@ import { DataService } from './../services/data.service';
   styleUrls: ['home.page.scss']
 })
 export class HomePage implements OnInit {
-  public loadedItems: Array<object>[] = [];
+  public loadedItems: Array<IItem> = [];
   public errorMessage: string = '';
   public isLoading: boolean = false;
 
@@ -28,6 +28,9 @@ export class HomePage implements OnInit {
         this.errorMessage = res.message;
       }
       this.loadedItems = res.data;
+      if (this.loadedItems.length > 0) {
+        this.dataService.addItemsToLocalStorage(this.loadedItems);
+      }
       this.isLoading = false;
       console.log(this.loadedItems);
     });
