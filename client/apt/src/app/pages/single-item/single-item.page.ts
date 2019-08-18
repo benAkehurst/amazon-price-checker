@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { DataService } from './../services/data.service';
-import { IItem } from '../interfaces/item.interface';
+import { DataService } from '../../services/data.service';
+import { IItem } from '../../interfaces/item.interface';
 
 @Component({
   selector: 'app-single-item',

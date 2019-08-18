@@ -14,7 +14,10 @@ export class HomePage implements OnInit {
   public errorMessage: string = '';
   public isLoading: boolean = false;
 
-  constructor(private dataService: DataService, private router: Router) {}
+  constructor(
+    private dataService: DataService,
+    private router: Router
+  ) {}
 
   ngOnInit() {
     this.isLoading = true;
@@ -43,9 +46,17 @@ export class HomePage implements OnInit {
     console.log(this.loadedItems);
   }
 
+  /**
+   * Goes to selected item page
+   * @param item
+   */
   public goToItemPage(item: IItem) {
     this.dataService.selectedItem = item;
     this.dataService.selectedPage = item._id;
     this.router.navigateByUrl(`/single-item/${item._id}`);
+  }
+
+  public addNewItemLink() {
+    this.router.navigateByUrl(`/add-item`);
   }
 }
