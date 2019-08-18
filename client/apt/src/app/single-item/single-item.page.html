@@ -11,13 +11,13 @@
 <ion-content *ngIf="!isLoading">
   <ion-grid>
     <ion-row>
-      <ion-col size-md="6" offset-md="3" text-center *ngIf="isLoading">
+      <ion-col size-md="12" offset-md="0" text-center *ngIf="isLoading">
         <ion-spinner color="primary"></ion-spinner>
       </ion-col>
-      <ion-col size-md="6" offset-md="3" *ngIf="!isLoading && !singleItem" text-center>
+      <ion-col size-md="12" offset-md="0" *ngIf="!isLoading && !singleItem" text-center>
         <p>Item Not Found.</p>
       </ion-col>
-      <ion-col size-md="6" offset-md="3" text-center>
+      <ion-col size-md="12" offset-md="0" text-center>
         <ion-card>
           <ion-card-header>
             <ion-card-subtitle>
@@ -31,8 +31,8 @@
             <h3>Target Price: {{singleItem.targetPrice}}</h3>
             <h3>Added to tracker: {{singleItem.created_date | date}}</h3>
             <h3>Lowest Tracked Price:</h3>
-              <p>Price: {{lowestTrackedPrice.price}}</p>
-              <p>When? {{lowestTrackedPrice.date | date}}</p>
+            <p>Price: {{lowestTrackedPrice.price}}</p>
+            <p>When? {{lowestTrackedPrice.date | date}}</p>
             <ion-list>
               <ion-radio-group>
                 <ion-list-header>
@@ -48,6 +48,14 @@
                 </ion-item>
               </ion-radio-group>
             </ion-list>
+            <ion-row>
+              <ion-col size-md="12" offset-md="0" text-center *ngIf="chartLoading">
+                <ion-spinner color="primary"></ion-spinner>
+              </ion-col>
+              <ion-col size-md="12" offset-md="0" text-center *ngIf="!chartLoading">
+                <h2>{{ priceGraphTitle }}</h2>
+              </ion-col>
+            </ion-row>
           </ion-card-content>
         </ion-card>
       </ion-col>

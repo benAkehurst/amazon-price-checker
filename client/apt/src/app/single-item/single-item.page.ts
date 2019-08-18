@@ -10,10 +10,12 @@ import { IItem } from '../interfaces/item.interface';
   styleUrls: ['./single-item.page.scss']
 })
 export class SingleItemPage implements OnInit {
-  public itemId: string = '';
+  public itemId = '';
   public singleItem: IItem;
   public lowestPrice: any;
-  public isLoading: boolean = false;
+  public isLoading = false;
+  public chartLoading = false;
+  public priceGraphTitle = 'Past Prices';
 
   constructor(
     private dataService: DataService,
@@ -34,18 +36,16 @@ export class SingleItemPage implements OnInit {
       this.dataService.getSingleItem(this.itemId).subscribe(res => {
         this.singleItem = res.data;
         this.lowestTrackedPrice();
-        console.log(this.lowestTrackedPrice);
+        this.createTrackedPriceChart();
         this.isLoading = false;
-        console.log(this.singleItem);
       });
     }
 
     if (this.dataService.selectedItem) {
       this.singleItem = this.dataService.selectedItem;
       this.lowestTrackedPrice();
-      console.log(this.lowestTrackedPrice);
+      this.createTrackedPriceChart();
       this.isLoading = false;
-      console.log(this.singleItem);
     }
   }
 
@@ -65,5 +65,9 @@ export class SingleItemPage implements OnInit {
     } else {
       return false;
     }
+  }
+
+  public createTrackedPriceChart() {
+    this.chartLoading = true;
   }
 }
