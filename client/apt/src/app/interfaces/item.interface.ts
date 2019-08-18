@@ -1,5 +1,5 @@
 export class IItem {
-  public id: string;
+  public _id: string;
   public name: string;
   public link: string;
   public imgUrl: string;
