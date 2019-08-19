@@ -70,4 +70,8 @@ export class SingleItemPage implements OnInit {
   public createTrackedPriceChart() {
     this.chartLoading = true;
   }
+
+  public removeItem() {
+    console.log('Remove item clicked');
+  }
 }
