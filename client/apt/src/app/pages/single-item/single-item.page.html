@@ -51,11 +51,16 @@
               </ion-radio-group>
             </ion-list>
             <ion-row>
-              <ion-col size-md="12" offset-md="0" text-center *ngIf="chartLoading">
-                <ion-spinner color="primary"></ion-spinner>
-              </ion-col>
-              <ion-col size-md="12" offset-md="0" text-center *ngIf="!chartLoading">
-                <h2>{{ priceGraphTitle }}</h2>
+              <ion-col size-md="12" offset-md="0" text-center>
+                <h2>Past Prices:</h2>
+                <ion-list>
+                  <ion-item *ngFor="let item of singleItem.pastPrices" class="single-item">
+                    <ion-label>
+                      <h5>{{ item.date | date }}</h5>
+                      <p>Price: £{{ item.price }}</p>
+                    </ion-label>
+                  </ion-item>
+                </ion-list>
               </ion-col>
             </ion-row>
           </ion-card-content>
