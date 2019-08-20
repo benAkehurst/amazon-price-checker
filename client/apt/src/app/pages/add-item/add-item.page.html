@@ -1,0 +1,55 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Add a new Item</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-progress-bar type="indeterminate" *ngIf="isScraping"></ion-progress-bar>
+  <ion-row>
+    <ion-col>
+      <form (ngSubmit)="onAddItem()" #f="ngForm">
+        <ion-grid>
+          <ion-row>
+            <ion-col size-sm="6" offset-sm="3">
+              <ion-item>
+                <ion-label position="floating">Amazon URL</ion-label>
+                <ion-input type="text" ngModel name="amazon-url" required></ion-input>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size-sm="6" offset-sm="3">
+              <ion-item>
+                <ion-label position="floating">What do you want to pay?</ion-label>
+                <ion-input type="number" ngModel name="target-price" required></ion-input>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size-sm="6" offset-sm="3">
+              <ion-item>
+                <ion-checkbox ngModel name="track-price" required></ion-checkbox>
+                <ion-label>Track this Price?</ion-label>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size-sm="6" offset-sm="3">
+              <h3 *ngIf="isError">{{ errorText }} aaa</h3>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size-sm="6" offset-sm="3">
+              <ion-button type="submit" color="primary" expand="block" [disabled]="!f.valid">
+                Add to tracking!
+              </ion-button>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </form>
+    </ion-col>
+  </ion-row>
+</ion-content>

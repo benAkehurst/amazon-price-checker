@@ -27,12 +27,14 @@
           </ion-card-header>
           <ion-card-content>
             <ion-img [src]="singleItem.imgUrl"></ion-img>
-            <h3>Current Price: {{singleItem.price}}</h3>
-            <h3>Target Price: {{singleItem.targetPrice}}</h3>
-            <h3>Added to tracker: {{singleItem.created_date | date}}</h3>
-            <h3>Lowest Tracked Price:</h3>
-            <p>Price: {{lowestTrackedPrice.price}}</p>
-            <p>When? {{lowestTrackedPrice.date | date}}</p>
+            <h2>Current Price: {{singleItem.price}}</h2>
+            <h2>Target Price: {{singleItem.targetPrice}}</h2>
+            <h2>Added to tracker: {{singleItem.created_date | date}}</h2>
+            <div *ngIf="singleItem.pastPrices.length > 0">
+              <h2>Lowest Tracked Price:</h2>
+              <p>Price: {{lowestTrackedPrice.price}}</p>
+              <p>When? {{lowestTrackedPrice.date | date}}</p>
+            </div>
             <ion-list>
               <ion-radio-group>
                 <ion-list-header>
@@ -49,11 +51,21 @@
               </ion-radio-group>
             </ion-list>
             <ion-row>
-              <ion-col size-md="12" offset-md="0" text-center *ngIf="chartLoading">
-                <ion-spinner color="primary"></ion-spinner>
+              <ion-col size-md="6" offset-md="3" text-center>
+                <ion-button shape="round" color="danger" (click)="removeItem()">Remove Item</ion-button>
               </ion-col>
-              <ion-col size-md="12" offset-md="0" text-center *ngIf="!chartLoading">
-                <h2>{{ priceGraphTitle }}</h2>
+            </ion-row>
+            <ion-row>
+              <ion-col size-md="12" offset-md="0" text-center>
+                <h2>Past Prices:</h2>
+                <ion-list>
+                  <ion-item *ngFor="let item of singleItem.pastPrices" class="single-item">
+                    <ion-label>
+                      <h5>{{ item.date | date }}</h5>
+                      <p>Price: £{{ item.price }}</p>
+                    </ion-label>
+                  </ion-item>
+                </ion-list>
               </ion-col>
             </ion-row>
           </ion-card-content>

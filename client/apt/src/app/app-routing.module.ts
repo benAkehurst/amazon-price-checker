@@ -13,9 +13,10 @@ const routes: Routes = [
   },
   {
     path: 'items',
-    loadChildren: () => import('./items/items.module').then(m => m.ItemsPageModule)
+    loadChildren: () => import('./pages/items/items.module').then(m => m.ItemsPageModule)
   },
-  { path: 'single-item/:id', loadChildren: './single-item/single-item.module#SingleItemPageModule' }
+  { path: 'single-item/:id', loadChildren: './pages/single-item/single-item.module#SingleItemPageModule' },
+  { path: 'add-item', loadChildren: './pages/add-item/add-item.module#AddItemPageModule' }
 ];
 
 @NgModule({

@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
-import { IItem, INewItem } from "../interfaces/item.interface";
+import { IItem, INewItem } from '../interfaces/item.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -13,26 +12,65 @@ export class DataService {
   private ApiPrefix = 'http://localhost:3000/';
   private appRoutes = {
     getAll: 'api/get-all-product-data',
-    getSingleItem: 'api/fetch-single-item',
     getFollowed: 'api/get-all-followed-items',
+    getSingleItem: 'api/fetch-single-item',
     initAddProduct: 'api/initial-add-product',
     updateItem: 'api/update-scraped-item',
     removeItem: 'api/remove-scraped-item'
   };
 
+  public newItem: INewItem;
   public selectedItem: IItem;
-  public selectedPage: string = '';
+  public selectedPage = '';
 
   constructor(private http: HttpClient) {}
 
   public getAllItems(): Observable<any> {
-    return this.http
-      .get(this.ApiPrefix + this.appRoutes.getAll);
+    return this.http.get(this.ApiPrefix + this.appRoutes.getAll);
+  }
+
+  public getAllFollowedItems(): Observable<any> {
+    return this.http.get(this.ApiPrefix + this.appRoutes.getFollowed);
   }
 
   public getSingleItem(_id: string): Observable<any> {
     return this.http.post(
-      this.ApiPrefix + this.appRoutes.getSingleItem, {id: _id}, {headers: this.headers}
+      this.ApiPrefix + this.appRoutes.getSingleItem,
+      { id: _id },
+      { headers: this.headers }
+    );
+  }
+
+  public addANewItem(newItem: INewItem): Observable<any> {
+    return this.http.post(
+      this.ApiPrefix + this.appRoutes.initAddProduct,
+      {
+        url: newItem.url,
+        follow: newItem.following,
+        targetPrice: newItem.targetPrice
+      },
+      { headers: this.headers }
+    );
+  }
+
+  public manuallyUpdatePrice(selectedItem: IItem) {
+    return this.http.post(
+      this.ApiPrefix + this.appRoutes.updateItem,
+      {
+        id: selectedItem._id,
+        targetPrice: selectedItem.targetPrice
+      },
+      { headers: this.headers }
+    );
+  }
+
+  public removeItem(selectedItem: IItem) {
+    return this.http.post(
+      this.ApiPrefix + this.appRoutes.removeItem,
+      {
+        id: selectedItem._id
+      },
+      { headers: this.headers }
     );
   }
 
@@ -44,10 +82,10 @@ export class DataService {
   }
 
   public getItemsFromLocalStorage() {
-     if (localStorage.getItem('items')) {
-       return JSON.parse(localStorage.getItem('items'));
-     }
-     return false;
+    if (localStorage.getItem('items')) {
+      return JSON.parse(localStorage.getItem('items'));
+    }
+    return false;
   }
 
   public clearLocalStorage() {

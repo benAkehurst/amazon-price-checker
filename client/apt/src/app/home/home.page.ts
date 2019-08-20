@@ -14,14 +14,12 @@ export class HomePage implements OnInit {
   public errorMessage: string = '';
   public isLoading: boolean = false;
 
-  constructor(private dataService: DataService, private router: Router) {}
+  constructor(
+    private dataService: DataService,
+    private router: Router
+  ) {}
 
   ngOnInit() {
-    this.isLoading = true;
-    this.getAllItems();
-  }
-
-  ionViewWillEnter() {
     this.isLoading = true;
     this.getAllItems();
   }
@@ -30,6 +28,10 @@ export class HomePage implements OnInit {
    * Fetchs all the items in the Database
    */
   public getAllItems() {
+    if (this.dataService.getItemsFromLocalStorage()) {
+      this.loadedItems = this.dataService.getItemsFromLocalStorage();
+      this.isLoading = false;
+    }
     this.dataService.getAllItems().subscribe(res => {
       if (res.success === false) {
         this.errorMessage = res.message;
@@ -40,12 +42,19 @@ export class HomePage implements OnInit {
         this.isLoading = false;
       }
     });
-    console.log(this.loadedItems);
   }
 
+  /**
+   * Goes to selected item page
+   * @param item
+   */
   public goToItemPage(item: IItem) {
     this.dataService.selectedItem = item;
     this.dataService.selectedPage = item._id;
     this.router.navigateByUrl(`/single-item/${item._id}`);
+  }
+
+  public addNewItemLink() {
+    this.router.navigateByUrl(`/add-item`);
   }
 }
