@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AlertController } from '@ionic/angular';
 
 import { DataService } from '../../services/data.service';
 import { IItem } from '../../interfaces/item.interface';
@@ -16,10 +17,13 @@ export class SingleItemPage implements OnInit {
   public isLoading = false;
   public chartLoading = false;
   public priceGraphTitle = 'Past Prices';
+  public isDeleting = false;
 
   constructor(
     private dataService: DataService,
-    private route: ActivatedRoute
+    private activeRoute: ActivatedRoute,
+    private aletCtrl: AlertController,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -28,7 +32,7 @@ export class SingleItemPage implements OnInit {
   }
 
   public getItemFromDataService() {
-    this.route.paramMap.subscribe(params => {
+    this.activeRoute.paramMap.subscribe(params => {
       this.itemId = params.get('id');
     });
 
@@ -71,7 +75,25 @@ export class SingleItemPage implements OnInit {
     this.chartLoading = true;
   }
 
-  public removeItem() {
-    console.log('Remove item clicked');
+  public removeItem(singleItem: IItem) {
+    this.isDeleting = true;
+    this.dataService.removeItem(singleItem).subscribe(response => {
+      console.log(response);
+      this.isDeleting = false;
+      this.showAlert(response.message);
+    });
+  }
+
+  private showAlert(message: string) {
+    this.aletCtrl
+      .create({
+        header: 'Item Removed',
+        message: message,
+        buttons: ['Okay']
+      })
+      .then(alertEl => {
+        alertEl.present();
+        this.router.navigateByUrl(`/home`);
+      });
   }
 }

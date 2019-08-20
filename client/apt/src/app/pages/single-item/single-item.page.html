@@ -6,8 +6,7 @@
     <ion-title>{{ isLoading? 'Loading' : singleItem.name }}</ion-title>
   </ion-toolbar>
 </ion-header>
-
-
+<ion-progress-bar type="indeterminate" *ngIf="isDeleting"></ion-progress-bar>
 <ion-content *ngIf="!isLoading">
   <ion-grid>
     <ion-row>
@@ -52,7 +51,7 @@
             </ion-list>
             <ion-row>
               <ion-col size-md="6" offset-md="3" text-center>
-                <ion-button shape="round" color="danger" (click)="removeItem()">Remove Item</ion-button>
+                <ion-button shape="round" color="danger" (click)="removeItem(singleItem)">Remove Item</ion-button>
               </ion-col>
             </ion-row>
             <ion-row>

@@ -14,14 +14,15 @@ export class HomePage implements OnInit {
   public errorMessage: string = '';
   public isLoading: boolean = false;
 
-  constructor(
-    private dataService: DataService,
-    private router: Router
-  ) {}
+  constructor(private dataService: DataService, private router: Router) {}
 
   ngOnInit() {
     this.isLoading = true;
     this.getAllItems();
+  }
+
+  ionViewWillEnter() {
+    this.getItemsFromDB();
   }
 
   /**
@@ -32,6 +33,19 @@ export class HomePage implements OnInit {
       this.loadedItems = this.dataService.getItemsFromLocalStorage();
       this.isLoading = false;
     }
+    this.dataService.getAllItems().subscribe(res => {
+      if (res.success === false) {
+        this.errorMessage = res.message;
+      }
+      this.loadedItems = res.data;
+      if (this.loadedItems.length > 0) {
+        this.dataService.addItemsToLocalStorage(this.loadedItems);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  public getItemsFromDB() {
     this.dataService.getAllItems().subscribe(res => {
       if (res.success === false) {
         this.errorMessage = res.message;
