@@ -72,30 +72,43 @@ export class SingleItemPage implements OnInit {
 
   public updateFollowingStatus(singleItem: IItem, follow: boolean) {
     this.isDeleting = true;
-    this.dataService.updateFollowStatus(singleItem, follow).subscribe(response => {
-      console.log(response);
-      this.isDeleting = false;
-    });
+    this.dataService
+      .updateFollowStatus(singleItem, follow)
+      .subscribe(response => {
+        console.log(response);
+        this.isDeleting = false;
+      });
   }
 
   public removeItem(singleItem: IItem) {
-    this.isDeleting = true;
-    this.dataService.removeItem(singleItem).subscribe(response => {
-      this.isDeleting = false;
-      this.showAlert(response.message);
-    });
+    this.confirmDelete(singleItem);
   }
 
-  private showAlert(message: string) {
-    this.aletCtrl
-      .create({
-        header: 'Item Removed',
-        message: message,
-        buttons: ['Okay']
-      })
-      .then(alertEl => {
-        alertEl.present();
-        this.router.navigateByUrl(`/home`);
-      });
+  private async confirmDelete(singleItem) {
+    const alert = await this.aletCtrl.create({
+      header: 'Confirm Delete!',
+      message: 'Are you <strong>sure</strong> you want to delete?',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          cssClass: 'secondary',
+          handler: blah => {
+            console.log('Confirm Cancel');
+          }
+        },
+        {
+          text: 'Okay',
+          handler: () => {
+            this.isDeleting = true;
+            this.dataService.removeItem(singleItem).subscribe(response => {
+              this.isDeleting = false;
+              this.router.navigateByUrl(`/home`);
+            });
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 }
