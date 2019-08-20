@@ -78,7 +78,6 @@ export class SingleItemPage implements OnInit {
   public removeItem(singleItem: IItem) {
     this.isDeleting = true;
     this.dataService.removeItem(singleItem).subscribe(response => {
-      console.log(response);
       this.isDeleting = false;
       this.showAlert(response.message);
     });
