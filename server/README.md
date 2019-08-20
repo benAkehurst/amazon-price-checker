@@ -8,6 +8,12 @@
 GET - http://localhost:3000/api/get-all-product-data
 ```
 
+### Get All Followed Items in Database
+
+```
+GET - http://localhost:3000//api/get-all-followed-items
+```
+
 ### Retreives a single item from the database
 
 ```
