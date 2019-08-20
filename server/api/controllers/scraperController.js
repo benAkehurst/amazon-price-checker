@@ -143,6 +143,7 @@ exports.delete_item = (req, res) => {
       res.send({
         error: err,
         message: "Couldn't find the requested item",
+        success: false,
         code: 400
       });
     }
@@ -154,6 +155,7 @@ exports.delete_item = (req, res) => {
         res.send({
           error: err,
           message: "Couldn't find the requested item",
+          success: false,
           code: 400
         });
       }
@@ -164,6 +166,7 @@ exports.delete_item = (req, res) => {
       res.send({
         error: err,
         message: "Couldn't find the requested item",
+        success: false,
         code: 400
       });
     }
