@@ -10,5 +10,6 @@ module.exports = app => {
   app.route('/api/fetch-single-item').post(scraperController.get_single_item);
   app.route('/api/initial-add-product').post(scraperController.first_scrape);
   app.route('/api/update-scraped-item').post(scraperController.update_item);
+  app.route('/api/update-scraped-following').post(scraperController.change_tracking);
   app.route('/api/remove-scraped-item').post(scraperController.delete_item);
 };

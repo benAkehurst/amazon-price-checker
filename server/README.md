@@ -47,6 +47,17 @@ Body:
 }
 ```
 
+### Updates the following status of an item
+
+```
+POST - http://localhost:3000/api/update-scraped-following
+Body:
+{
+  "id": "single object _id",
+  "follow": "boolean"
+}
+```
+
 ### Removes the item from the items database, and adds it to a deleted collection
 
 ```

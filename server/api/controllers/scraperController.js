@@ -136,6 +136,28 @@ exports.update_item = (req, res) => {
   }
 };
 
+exports.change_tracking = (req, res) => {
+  let id = req.body.id;
+  let follow = req.body.follow;
+  SingleItem.findOne({ _id: id }, (err, item) => {
+    item.following = follow;
+    item.save((err, updatedItem) => {
+        if (err) {
+          res.send({
+            error: err,
+            message: "Couldn't update following status",
+            success: false
+          });
+        }
+        res.send({
+          message: 'Item updated',
+          success: true,
+          obj: updatedItem
+        });
+    });
+});
+}
+
 exports.delete_item = (req, res) => {
   let id = req.body.id;
   SingleItem.findById(id, (err, document) => {
