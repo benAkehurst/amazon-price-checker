@@ -14,5 +14,5 @@ export class IItem {
 export class INewItem {
   public url: string;
   public targetPrice: number;
-  public following: boolean;
+  public following?: boolean;
 }

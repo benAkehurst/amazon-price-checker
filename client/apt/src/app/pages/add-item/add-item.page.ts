@@ -1,8 +1,9 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
 import { NgForm } from '@angular/forms';
+import { LoadingController, AlertController } from '@ionic/angular';
 
 import { DataService } from '../../services/data.service';
-import { INewItem } from '../../interfaces/item.interface';
 
 @Component({
   selector: 'app-add-item',
@@ -10,23 +11,41 @@ import { INewItem } from '../../interfaces/item.interface';
   styleUrls: ['./add-item.page.scss']
 })
 export class AddItemPage implements OnInit {
-  @ViewChild('f', {static: true}) form: NgForm;
+  @ViewChild('f', { static: true }) form: NgForm;
   public isLoading = false;
-  public newItem: INewItem;
+  public isError = false;
+  public isScraping = false;
+  public errorText = '';
 
-  constructor(private dataService: DataService) {}
+  constructor(
+    private dataService: DataService,
+    private loadingCtrl: LoadingController,
+    private aletCtrl: AlertController,
+    private router: Router
+  ) {}
 
   ngOnInit() {
     this.isLoading = true;
   }
 
   public onAddItem() {
+    const newUrl = this.form.value['amazon-url'];
+    const newTargetPrice = this.form.value['target-price'];
+    const newTrackPrice = this.form.value['track-price'];
     const itemData = {
-      amazonUrl: this.validateUrlStr(this.form.value['amazon-url']),
-      trackPrice: this.form.value['track-price'],
-      targetPrice: this.form.value['target-price']
+      url: newUrl,
+      targetPrice: newTargetPrice,
+      following: newTrackPrice
     };
-    console.log(itemData);
+    this.isScraping = true;
+    this.dataService.addANewItem(itemData).subscribe(response => {
+      console.log(response);
+      if (response.success === false) {
+        this.isError = response.msg;
+      }
+      this.isScraping = false;
+      this.showAlert(response.msg);
+    });
   }
 
   public validateUrlStr(targetUrl: string) {
@@ -41,5 +60,19 @@ export class AddItemPage implements OnInit {
       'i'
     ); // fragment locator
     return !!pattern.test(url);
+  }
+
+  private showAlert(message: string) {
+    this.aletCtrl
+      .create({
+        header: 'Item Added',
+        message: message,
+        buttons: ['Okay']
+      })
+      .then(alertEl => {
+        alertEl.present();
+        this.form.reset();
+        this.router.navigateByUrl(`/home`);
+      });
   }
 }
