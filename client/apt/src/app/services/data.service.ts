@@ -16,6 +16,7 @@ export class DataService {
     getSingleItem: 'api/fetch-single-item',
     initAddProduct: 'api/initial-add-product',
     updateItem: 'api/update-scraped-item',
+    updateFollow: 'api/update-scraped-following',
     removeItem: 'api/remove-scraped-item'
   };
 
@@ -49,6 +50,14 @@ export class DataService {
         follow: newItem.following,
         targetPrice: newItem.targetPrice
       },
+      { headers: this.headers }
+    );
+  }
+
+  public updateFollowStatus(selectedItem: IItem, followBool: boolean) {
+    return this.http.post(
+      this.ApiPrefix + this.appRoutes.updateFollow,
+      { id: selectedItem._id, follow: followBool },
       { headers: this.headers }
     );
   }
