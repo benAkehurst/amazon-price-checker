@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgForm } from '@angular/forms';
-import { LoadingController, AlertController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular';
 
 import { DataService } from '../../services/data.service';
 
@@ -19,7 +19,6 @@ export class AddItemPage implements OnInit {
 
   constructor(
     private dataService: DataService,
-    private loadingCtrl: LoadingController,
     private aletCtrl: AlertController,
     private router: Router
   ) {}
@@ -39,7 +38,6 @@ export class AddItemPage implements OnInit {
     };
     this.isScraping = true;
     this.dataService.addANewItem(itemData).subscribe(response => {
-      console.log(response);
       if (response.success === false) {
         this.isError = response.msg;
       }
