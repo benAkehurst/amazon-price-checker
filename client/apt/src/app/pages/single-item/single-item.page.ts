@@ -70,14 +70,25 @@ export class SingleItemPage implements OnInit {
     this.chartLoading = true;
   }
 
-  public updateFollowingStatus(singleItem: IItem, follow: boolean) {
-    this.isDeleting = true;
-    this.dataService
-      .updateFollowStatus(singleItem, follow)
-      .subscribe(response => {
-        console.log(response);
-        this.isDeleting = false;
-      });
+  public updateFollowingStatus(e) {
+    if (e.target.checked === true) {
+      this.isDeleting = true;
+      this.dataService
+        .updateFollowStatus(this.singleItem, true)
+        .subscribe(response => {
+          this.showAlert('Following Status Updated');
+          this.isDeleting = false;
+        });
+    }
+    if (e.target.checked === false) {
+      this.isDeleting = true;
+      this.dataService
+        .updateFollowStatus(this.singleItem, false)
+        .subscribe(response => {
+          this.showAlert(`Following Status: ${response.obj.following}`);
+          this.isDeleting = false;
+        });
+    }
   }
 
   public removeItem(singleItem: IItem) {
@@ -110,5 +121,16 @@ export class SingleItemPage implements OnInit {
       ]
     });
     await alert.present();
+  }
+
+  private showAlert(message: string) {
+    this.aletCtrl
+      .create({
+        message: message,
+        buttons: ['Close']
+      })
+      .then(alertEl => {
+        alertEl.present();
+      });
   }
 }

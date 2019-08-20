@@ -37,7 +37,7 @@
             </ion-item>
             <ion-item>
               <ion-label>Following?</ion-label>
-              <ion-checkbox [checked]="singleItem.following"></ion-checkbox>
+              <ion-checkbox [checked]="singleItem.following" [(ngModel)]="singleItem.following" (ionChange)="updateFollowingStatus($event)"></ion-checkbox>
             </ion-item>
             <ion-row>
               <ion-col size-md="6" offset-md="3" text-center>
