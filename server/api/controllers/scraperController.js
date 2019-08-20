@@ -212,7 +212,7 @@ let scraper = async url => {
     let title = document.querySelector('#productTitle').innerText;
     let imgUrl = document.querySelector('#imgTagWrapperId > img').src;
     let priceStr = document.querySelector('#priceblock_ourprice').innerText;
-    let priceInt = parseInt(priceStr.replace(/£/g, ''));
+    let priceInt = parseInt(priceStr.replace(/£/g, '').replace(/,/g, ''));
     return {
       title,
       imgUrl,
