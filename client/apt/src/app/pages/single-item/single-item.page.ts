@@ -70,6 +70,14 @@ export class SingleItemPage implements OnInit {
     this.chartLoading = true;
   }
 
+  public updateFollowingStatus(singleItem: IItem, follow: boolean) {
+    this.isDeleting = true;
+    this.dataService.updateFollowStatus(singleItem, follow).subscribe(response => {
+      console.log(response);
+      this.isDeleting = false;
+    });
+  }
+
   public removeItem(singleItem: IItem) {
     this.isDeleting = true;
     this.dataService.removeItem(singleItem).subscribe(response => {

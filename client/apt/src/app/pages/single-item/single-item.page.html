@@ -26,28 +26,19 @@
           </ion-card-header>
           <ion-card-content>
             <ion-img [src]="singleItem.imgUrl"></ion-img>
-            <h2>Current Price: £{{singleItem.price}}</h2>
-            <h2>Target Price: £{{singleItem.targetPrice}}</h2>
-            <h2>Added to tracker: {{singleItem.created_date | date}}</h2>
-            <div *ngIf="singleItem.pastPrices.length > 0">
-              <h2>Lowest Tracked Price:</h2>
-              <p>Price: £{{lowestPrice}}</p>
-            </div>
-            <ion-list>
-              <ion-radio-group>
-                <ion-list-header>
-                  <ion-label>Following?</ion-label>
-                </ion-list-header>
-                <ion-item>
-                  <ion-label>Yes</ion-label>
-                  <ion-radio slot="start" value="yes" [checked]="checkFollowingDefault(singleItem)"></ion-radio>
-                </ion-item>
-                <ion-item>
-                  <ion-label>No</ion-label>
-                  <ion-radio slot="start" value="no"></ion-radio>
-                </ion-item>
-              </ion-radio-group>
-            </ion-list>
+            <ion-item>
+              <h2>Current Price: £{{singleItem.price}}</h2>
+              <h2>Target Price: £{{singleItem.targetPrice}}</h2>
+              <h2>Added to tracker: {{singleItem.created_date | date}}</h2>
+              <div *ngIf="singleItem.pastPrices.length > 0">
+                <h2>Lowest Tracked Price:</h2>
+                <p>Price: £{{lowestPrice}}</p>
+              </div>
+            </ion-item>
+            <ion-item>
+              <ion-label>Following?</ion-label>
+              <ion-checkbox [checked]="singleItem.following"></ion-checkbox>
+            </ion-item>
             <ion-row>
               <ion-col size-md="6" offset-md="3" text-center>
                 <ion-button shape="round" color="danger" (click)="removeItem(singleItem)">Remove Item</ion-button>
