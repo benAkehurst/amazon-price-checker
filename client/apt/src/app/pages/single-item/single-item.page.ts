@@ -55,12 +55,7 @@ export class SingleItemPage implements OnInit {
 
   public lowestTrackedPrice() {
     const arr = this.singleItem.pastPrices;
-    Math.min.apply(
-      Math,
-      arr.map(o => {
-        this.lowestTrackedPrice = o;
-      })
-    );
+    this.lowestPrice = Math.min.apply(null, arr.map(item => item.price));
   }
 
   public checkFollowingDefault(item: IItem): boolean {

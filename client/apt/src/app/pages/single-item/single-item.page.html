@@ -26,13 +26,12 @@
           </ion-card-header>
           <ion-card-content>
             <ion-img [src]="singleItem.imgUrl"></ion-img>
-            <h2>Current Price: {{singleItem.price}}</h2>
-            <h2>Target Price: {{singleItem.targetPrice}}</h2>
+            <h2>Current Price: £{{singleItem.price}}</h2>
+            <h2>Target Price: £{{singleItem.targetPrice}}</h2>
             <h2>Added to tracker: {{singleItem.created_date | date}}</h2>
             <div *ngIf="singleItem.pastPrices.length > 0">
               <h2>Lowest Tracked Price:</h2>
-              <p>Price: {{lowestTrackedPrice.price}}</p>
-              <p>When? {{lowestTrackedPrice.date | date}}</p>
+              <p>Price: £{{lowestPrice}}</p>
             </div>
             <ion-list>
               <ion-radio-group>
