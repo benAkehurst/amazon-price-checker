@@ -1,5 +1,6 @@
 'use strict';
 const mongoose = require('mongoose');
+const User = mongoose.model('User');
 const SingleItem = mongoose.model('SingleItem');
 const Items = mongoose.model('Items');
 const Deleted = mongoose.model('Deleted');
@@ -71,6 +72,7 @@ exports.get_all_followed_items = (req, res) => {
 };
 
 exports.first_scrape = (req, res) => {
+  let userId = req.body.userId;
   let url = req.body.url;
   let follow = req.body.follow;
   let target = req.body.targetPrice;
@@ -94,7 +96,8 @@ exports.first_scrape = (req, res) => {
           imgUrl: data.imgUrl,
           price: data.priceInt,
           following: follow,
-          targetPrice: target
+          targetPrice: target,
+          users: userId
         });
         newItem.save((err, item) => {
           if (err) {
@@ -108,6 +111,20 @@ exports.first_scrape = (req, res) => {
             uid: item._id
           });
           itemCollection.save();
+          User.findByIdAndUpdate(
+            userId,
+            { items: item._id },
+            (err, data) => {
+              if (err) {
+                res.send({
+                  error: err,
+                  message: "Couldn't add item in to user",
+                  code: 400
+                });
+              }
+              console.log('Item added to user profile');
+            }
+          );
           res.status(201).json({
             message: 'Item found and saved in database',
             success: true,
@@ -142,21 +159,21 @@ exports.change_tracking = (req, res) => {
   SingleItem.findOne({ _id: id }, (err, item) => {
     item.following = follow;
     item.save((err, updatedItem) => {
-        if (err) {
-          res.send({
-            error: err,
-            message: "Couldn't update following status",
-            success: false
-          });
-        }
+      if (err) {
         res.send({
-          message: 'Item updated',
-          success: true,
-          obj: updatedItem
+          error: err,
+          message: "Couldn't update following status",
+          success: false
         });
+      }
+      res.send({
+        message: 'Item updated',
+        success: true,
+        obj: updatedItem
+      });
     });
-});
-}
+  });
+};
 
 exports.delete_item = (req, res) => {
   let id = req.body.id;

@@ -24,6 +24,9 @@ const SingleItemSchema = new Schema({
   pastPrices: {
     type: Array
   },
+  users: {
+    type: Array
+  },
   created_date: {
     type: Date,
     default: Date.now
