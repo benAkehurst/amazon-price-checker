@@ -111,18 +111,17 @@ exports.first_scrape = (req, res) => {
             uid: item._id
           });
           itemCollection.save();
-          User.findByIdAndUpdate(
-            userId,
-            { items: item._id },
-            (err, data) => {
+          User.update(
+            { _id: userId },
+            { $push: { user_items: item._id } },
+            (err, done) => {
               if (err) {
                 res.send({
                   error: err,
-                  message: "Couldn't add item in to user",
+                  message: "Couldn't create item in database",
                   code: 400
                 });
               }
-              console.log('Item added to user profile');
             }
           );
           res.status(201).json({
@@ -176,8 +175,24 @@ exports.change_tracking = (req, res) => {
 };
 
 exports.delete_item = (req, res) => {
-  let id = req.body.id;
-  SingleItem.findById(id, (err, document) => {
+  let userId = req.body.userId;
+  let itemId = req.body.itemId;
+  // TODO: finish delete item for user array
+  // console.log(userId, itemId);
+  // User.findOneAndUpdate(
+  //   { _id: userId },
+  //   {
+  //     $pullAll: { 'user_items': itemId }
+  //   },
+  //   { safe: true },
+  //   (err, data) => {
+  //     if (err) {
+  //       console.log('Error: ', err);
+  //     }
+  //     console.log('Data :', data);
+  //   }
+  // );
+  SingleItem.findById(itemId, (err, document) => {
     if (err) {
       res.send({
         error: err,
@@ -200,7 +215,7 @@ exports.delete_item = (req, res) => {
       }
     });
   });
-  SingleItem.findByIdAndRemove(id, (err, success) => {
+  SingleItem.findByIdAndRemove(itemId, (err, success) => {
     if (err) {
       res.send({
         error: err,
@@ -209,11 +224,11 @@ exports.delete_item = (req, res) => {
         code: 400
       });
     }
-    res.send({
-      message: 'Item deleted from database',
-      success: true,
-      obj: success
-    });
+    console.log('Item removed from items db');
+  });
+  res.send({
+    message: 'Item deleted from database',
+    success: true
   });
 };
 
