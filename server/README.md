@@ -1,6 +1,6 @@
 # Amazon Price Checker Nodejs API server
 
-## Endpoints
+## Items Endpoints
 
 ### Get All Items in Database
 
@@ -66,4 +66,35 @@ Body:
 {
   "id":"single object _id"
 }
+```
+
+## User Endpoints
+
+### Gets all the users in the DB
+
+```
+GET - http://localhost:3000/api/users
+```
+
+### Create a new user
+
+```
+POST - http://localhost:3000/user/create
+Body:
+{
+  "name": "Users name",
+  "email": "Users email",
+  "password": "Users password"
+}
+```
+
+### Login a user
+
+```
+POST - http://localhost:3000/user/login
+Body:
+  {
+    "email": "Users email",
+    "password": "Users password"
+  }
 ```

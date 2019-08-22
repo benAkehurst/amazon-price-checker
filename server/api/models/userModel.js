@@ -23,14 +23,8 @@ const UserSchema = new Schema({
     type: Date,
     default: Date.now
   },
-  status: {
-    type: [
-      {
-        type: String,
-        enum: ['pending', 'aproved', 'deleted']
-      }
-    ],
-    default: ['aproved']
+  items: {
+    type: Array
   }
 });
 
