@@ -24,12 +24,23 @@ Body:
 }
 ```
 
+### Get all the items from a single user
+
+```
+POST - http://localhost:3000/api/get-single-user-items
+Body:
+{
+  "userId":"user._id"
+}
+```
+
 ### Launches the server to scrape the item and add it to the database
 
 ```
 POST - http://localhost:3000/api/initial-add-product
 Body:
 {
+  "userId": "user._id",
   "url": "amazon url",
   "follow": boolean,
   "targetPrice": number
@@ -64,7 +75,8 @@ Body:
 POST - http://localhost:3000/api/remove-scraped-item
 Body:
 {
-  "id":"single object _id"
+  "userId": "user._id",
+  "itemId":"single object _id"
 }
 ```
 
