@@ -86,10 +86,12 @@ export class DataService {
   }
 
   public removeItem(selectedItem: IItem) {
+    const userID = this.fetchUserIdFromLS();
     return this.http.post(
       this.ApiPrefix + this.appRoutes.removeItem,
       {
-        id: selectedItem._id
+        userId: userID,
+        itemId: selectedItem._id
       },
       { headers: this.headers }
     );
