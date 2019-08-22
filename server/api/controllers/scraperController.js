@@ -48,6 +48,23 @@ exports.get_single_item = (req, res) => {
   });
 };
 
+exports.get_single_user_items = (req, res) => {
+  let userId = req.body.userId;
+  SingleItem.find({ users: { $all: [userId] } }, (err, data) => {
+    if (err) {
+      res.send({
+        msg: 'user or items not found',
+        success: false
+      });
+    }
+    res.send({
+      success: true,
+      msg: 'All user Items found',
+      obj: data
+    });
+  });
+};
+
 exports.get_all_followed_items = (req, res) => {
   SingleItem.find({}, (err, items) => {
     let followedItems = [];
@@ -178,20 +195,20 @@ exports.delete_item = (req, res) => {
   let userId = req.body.userId;
   let itemId = req.body.itemId;
   // TODO: finish delete item for user array
-  // console.log(userId, itemId);
-  // User.findOneAndUpdate(
-  //   { _id: userId },
-  //   {
-  //     $pullAll: { 'user_items': itemId }
-  //   },
-  //   { safe: true },
-  //   (err, data) => {
-  //     if (err) {
-  //       console.log('Error: ', err);
-  //     }
-  //     console.log('Data :', data);
-  //   }
-  // );
+  console.log(userId, itemId);
+  User.updateOne(
+    { _id: userId },
+    { $pull: { user_items: itemId } },
+    (err, done) => {
+      if (err) {
+        res.send({
+          error: err,
+          message: "Couldn't create item in database",
+          code: 400
+        });
+      }
+    }
+  );
   SingleItem.findById(itemId, (err, document) => {
     if (err) {
       res.send({

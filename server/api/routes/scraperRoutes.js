@@ -7,6 +7,7 @@ module.exports = app => {
    */
   app.route('/api/get-all-product-data').get(scraperController.get_all_items);
   app.route('/api/get-all-followed-items').get(scraperController.get_all_followed_items);
+  app.route('/api/get-single-user-items').post(scraperController.get_single_user_items);
   app.route('/api/fetch-single-item').post(scraperController.get_single_item);
   app.route('/api/initial-add-product').post(scraperController.first_scrape);
   app.route('/api/update-scraped-item').post(scraperController.update_item);

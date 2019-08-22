@@ -23,7 +23,7 @@ const UserSchema = new Schema({
     type: Date,
     default: Date.now
   },
-  items: {
+  user_items: {
     type: Array
   }
 });
