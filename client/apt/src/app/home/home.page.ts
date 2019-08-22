@@ -29,16 +29,17 @@ export class HomePage implements OnInit {
    * Fetchs all the items in the Database
    */
   public getAllItems() {
-    if (this.dataService.getItemsFromLocalStorage()) {
+    if (this.dataService.getSingleUserItems()) {
       this.loadedItems = this.dataService.getItemsFromLocalStorage();
       this.isLoading = false;
     }
-    this.dataService.getAllItems().subscribe(res => {
+    this.dataService.getSingleUserItems().subscribe(res => {
       if (res.success === false) {
         this.errorMessage = res.message;
       }
+      console.log(res);
       this.loadedItems = res.data;
-      if (this.loadedItems.length > 0) {
+      if (this.loadedItems.length >= 0) {
         this.dataService.addItemsToLocalStorage(this.loadedItems);
         this.isLoading = false;
       }
@@ -46,7 +47,7 @@ export class HomePage implements OnInit {
   }
 
   public getItemsFromDB() {
-    this.dataService.getAllItems().subscribe(res => {
+    this.dataService.getSingleUserItems().subscribe(res => {
       if (res.success === false) {
         this.errorMessage = res.message;
       }

@@ -14,6 +14,7 @@ export class DataService {
     getAll: 'api/get-all-product-data',
     getFollowed: 'api/get-all-followed-items',
     getSingleItem: 'api/fetch-single-item',
+    getSingleUserItems: 'api/get-single-user-items',
     initAddProduct: 'api/initial-add-product',
     updateItem: 'api/update-scraped-item',
     updateFollow: 'api/update-scraped-following',
@@ -49,6 +50,17 @@ export class DataService {
         url: newItem.url,
         follow: newItem.following,
         targetPrice: newItem.targetPrice
+      },
+      { headers: this.headers }
+    );
+  }
+
+  public getSingleUserItems(): Observable<any> {
+    const userID = this.fetchUserIdFromLS();
+    return this.http.post(
+      this.ApiPrefix + this.appRoutes.getSingleUserItems,
+      {
+        userId: userID
       },
       { headers: this.headers }
     );
@@ -99,5 +111,9 @@ export class DataService {
 
   public clearLocalStorage() {
     localStorage.clear();
+  }
+
+  public fetchUserIdFromLS() {
+    return localStorage.getItem('userId');
   }
 }

@@ -60,7 +60,7 @@ exports.get_single_user_items = (req, res) => {
     res.send({
       success: true,
       msg: 'All user Items found',
-      obj: data
+      data: data
     });
   });
 };
