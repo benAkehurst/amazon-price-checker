@@ -315,7 +315,7 @@ let cron_update_item = async (id, targetPrice) => {
                 };
               }
               if (newObj.price < targetPrice) {
-                sendEmail(newObj);
+                sendEmail(itemId);
               }
               let log = {
                 msg: `Cron Job Run`,
@@ -341,14 +341,33 @@ let cron_update_item = async (id, targetPrice) => {
   });
 };
 
-function sendEmail(result) {
+function sendEmail(itemId) {
+  SingleItem.findById(itemId, (err, doc) => {
+    User.findById(doc.users)
+      .populate()
+      .exec((err, user) => {
+        let dataObj = {
+          data: doc,
+          user: user
+        };
+        mailConfig(dataObj);
+      });
+  });
+}
+
+function mailConfig(dataObj) {
+  console.log(dataObj);
   const mailOptions = {
-    from: process.env.GMAIL_LOGIN,
-    to: process.env.GMAIL_LOGIN,
-    subject: `AMAZON PRICE TRACK - ${result.title} - PRICE: ${result.priceInt}`,
-    html: `<p>The ${result.title} you wanted to buy is now ${
-      result.priceInt
-    }! Go buy it!!!></p>`
+    from: `${dataObj.user.email}`,
+    to: `${dataObj.user.email}`,
+    subject: `AMAZON PRICE TRACK - ${
+      dataObj.data.name
+    } HAS HIT THE TARGET PRICE`,
+    html: `<p>The ${
+      dataObj.data.name
+    } you wanted to buy is now at your target price! <a href="${
+      dataObj.data.link
+    }">Buy it HERE!</a></p>`
   };
   const transporter = nodemailer.createTransport({
     service: 'gmail',
