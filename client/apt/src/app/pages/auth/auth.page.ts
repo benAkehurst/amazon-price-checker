@@ -42,8 +42,9 @@ export class AuthPage implements OnInit {
         authObs.subscribe(
           resData => {
             this.isLoading = false;
-            console.log(resData);
             this.dataService.addUserIDtoLS(resData.obj._id);
+            this.dataService.isLoggedIn = true;
+            this.dataService.saveLoginStatus();
             loadingEl.dismiss();
             this.router.navigateByUrl('/home');
           },

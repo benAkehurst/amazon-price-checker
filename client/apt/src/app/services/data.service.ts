@@ -28,6 +28,7 @@ export class DataService {
   public selectedItem: IItem;
   public user: IUser;
   public selectedPage = '';
+  public isLoggedIn = false;
 
   constructor(private http: HttpClient) {}
 
@@ -64,6 +65,7 @@ export class DataService {
    */
   public logoutUser() {
     this.logoutUserLS();
+    this.isLoggedIn = false;
   }
 
   /**
@@ -199,6 +201,21 @@ export class DataService {
       localStorage.removeItem('userId');
     }
     localStorage.setItem('userId', JSON.stringify(userId));
+  }
+
+  public saveLoginStatus() {
+    if (!this.isLoggedIn) {
+      return false;
+    }
+    localStorage.setItem('loggedIn', JSON.stringify(true));
+  }
+
+  public checkLoggedInStatus() {
+    const status = localStorage.getItem('loggedIn');
+    if (!JSON.parse(status)) {
+      return false;
+    }
+    return true;
   }
 
   public logoutUserLS() {
