@@ -95,10 +95,11 @@ export class DataService {
   /**
    * POST - Adds an item to the database
    */
-  public addANewItem(newItem: INewItem): Observable<any> {
+  public addANewItem(newItem: any): Observable<any> {
     return this.http.post(
       this.ApiPrefix + this.appRoutes.initAddProduct,
       {
+        userId: newItem.userId,
         url: newItem.url,
         follow: newItem.following,
         targetPrice: newItem.targetPrice

@@ -28,10 +28,12 @@ export class AddItemPage implements OnInit {
   }
 
   public onAddItem() {
+    const userId = this.dataService.fetchUserIdFromLS();
     const newUrl = this.form.value['amazon-url'];
     const newTargetPrice = this.form.value['target-price'];
     const newTrackPrice = this.form.value['track-price'];
     const itemData = {
+      userId: userId,
       url: newUrl,
       targetPrice: newTargetPrice,
       following: newTrackPrice
