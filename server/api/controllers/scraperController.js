@@ -198,11 +198,7 @@ exports.delete_item = (req, res) => {
     { $pull: { user_items: itemId } },
     (err, done) => {
       if (err) {
-        res.send({
-          error: err,
-          message: "Couldn't create item in database",
-          code: 400
-        });
+        console.log(err);
       }
     }
   );
