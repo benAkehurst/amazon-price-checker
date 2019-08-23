@@ -10,7 +10,8 @@ import { IUser } from '../interfaces/user.interface';
 })
 export class DataService {
   private headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-  private ApiPrefix = 'http://localhost:3000/';
+  private ApiPrefixLocal = 'http://localhost:3000/';
+  private ApiPrefixProd = '';
   private appRoutes = {
     createUser: 'api/user/create',
     loginUser: 'api/user/login',
@@ -37,7 +38,7 @@ export class DataService {
    */
   public createNewUser(Uemail: string, Upassword: string): Observable<any> {
     return this.http.post(
-      this.ApiPrefix + this.appRoutes.createUser,
+      this.ApiPrefixLocal + this.appRoutes.createUser,
       {
         email: Uemail,
         password: Upassword
@@ -51,7 +52,7 @@ export class DataService {
    */
   public loginUser(Uemail: string, Upassword: string): Observable<any> {
     return this.http.post(
-      this.ApiPrefix + this.appRoutes.loginUser,
+      this.ApiPrefixLocal + this.appRoutes.loginUser,
       {
         email: Uemail,
         password: Upassword
@@ -72,14 +73,14 @@ export class DataService {
    * GET - all items in the database
    */
   public getAllItems(): Observable<any> {
-    return this.http.get(this.ApiPrefix + this.appRoutes.getAll);
+    return this.http.get(this.ApiPrefixLocal + this.appRoutes.getAll);
   }
 
   /**
    * GET - all items that have follow = true
    */
   public getAllFollowedItems(): Observable<any> {
-    return this.http.get(this.ApiPrefix + this.appRoutes.getFollowed);
+    return this.http.get(this.ApiPrefixLocal + this.appRoutes.getFollowed);
   }
 
   /**
@@ -88,7 +89,7 @@ export class DataService {
    */
   public getSingleItem(_id: string): Observable<any> {
     return this.http.post(
-      this.ApiPrefix + this.appRoutes.getSingleItem,
+      this.ApiPrefixLocal + this.appRoutes.getSingleItem,
       { id: _id },
       { headers: this.headers }
     );
@@ -99,7 +100,7 @@ export class DataService {
    */
   public addANewItem(newItem: any): Observable<any> {
     return this.http.post(
-      this.ApiPrefix + this.appRoutes.initAddProduct,
+      this.ApiPrefixLocal + this.appRoutes.initAddProduct,
       {
         userId: newItem.userId,
         url: newItem.url,
@@ -118,7 +119,7 @@ export class DataService {
   public getSingleUserItems(): Observable<any> {
     const userID = JSON.parse(this.fetchUserIdFromLS());
     return this.http.post(
-      this.ApiPrefix + this.appRoutes.getSingleUserItems,
+      this.ApiPrefixLocal + this.appRoutes.getSingleUserItems,
       {
         userId: userID
       },
@@ -132,7 +133,7 @@ export class DataService {
    */
   public updateFollowStatus(selectedItem: IItem, followBool: boolean) {
     return this.http.post(
-      this.ApiPrefix + this.appRoutes.updateFollow,
+      this.ApiPrefixLocal + this.appRoutes.updateFollow,
       { id: selectedItem._id, follow: followBool },
       { headers: this.headers }
     );
@@ -144,7 +145,7 @@ export class DataService {
    */
   public manuallyUpdatePrice(selectedItem: IItem) {
     return this.http.post(
-      this.ApiPrefix + this.appRoutes.updateItem,
+      this.ApiPrefixLocal + this.appRoutes.updateItem,
       {
         id: selectedItem._id,
         targetPrice: selectedItem.targetPrice
@@ -160,7 +161,7 @@ export class DataService {
   public removeItem(selectedItem: IItem) {
     const userID = this.fetchUserIdFromLS();
     return this.http.post(
-      this.ApiPrefix + this.appRoutes.removeItem,
+      this.ApiPrefixLocal + this.appRoutes.removeItem,
       {
         userId: userID,
         itemId: selectedItem._id
