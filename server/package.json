@@ -18,6 +18,9 @@
   "bugs": {
     "url": "https://github.com/benAkehurst/nodejs-api-server/issues"
   },
+  "engines": {
+    "node": "10.x"
+  },
   "homepage": "https://github.com/benAkehurst/amazon-price-checker/tree/master/server#amazon-price-checker-nodejs-api-server",
   "devDependencies": {
     "nodemon": "^1.18.10"
