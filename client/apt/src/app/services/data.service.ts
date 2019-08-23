@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { IItem, INewItem } from '../interfaces/item.interface';
+import { IUser } from '../interfaces/user.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +12,8 @@ export class DataService {
   private headers = new HttpHeaders({ 'Content-Type': 'application/json' });
   private ApiPrefix = 'http://localhost:3000/';
   private appRoutes = {
+    createUser: 'user/create',
+    loginUser: 'user/login',
     getAll: 'api/get-all-product-data',
     getFollowed: 'api/get-all-followed-items',
     getSingleItem: 'api/fetch-single-item',
@@ -23,18 +26,69 @@ export class DataService {
 
   public newItem: INewItem;
   public selectedItem: IItem;
+  public user: IUser;
   public selectedPage = '';
 
   constructor(private http: HttpClient) {}
 
+  /**
+   * Create User
+   */
+  public createNewUser(
+    Uname: IUser,
+    Uemail: IUser,
+    Upassword: IUser
+  ): Observable<any> {
+    return this.http.post(
+      this.ApiPrefix + this.appRoutes.createUser,
+      {
+        name: Uname,
+        email: Uemail,
+        password: Upassword
+      },
+      { headers: this.headers }
+    );
+  }
+
+  /**
+   * Login User
+   */
+  public loginUser(Uemail: IUser, Upassword: IUser): Observable<any> {
+    return this.http.post(
+      this.ApiPrefix + this.appRoutes.loginUser,
+      {
+        email: Uemail,
+        password: Upassword
+      },
+      { headers: this.headers }
+    );
+  }
+
+  /**
+   * Logout user
+   */
+  public logoutUser() {
+    this.logoutUserLS();
+  }
+
+  /**
+   * GET - all items in the database
+   */
   public getAllItems(): Observable<any> {
     return this.http.get(this.ApiPrefix + this.appRoutes.getAll);
   }
 
+  /**
+   * GET - all items that have follow = true
+   */
   public getAllFollowedItems(): Observable<any> {
     return this.http.get(this.ApiPrefix + this.appRoutes.getFollowed);
   }
 
+  /**
+   * POST - Item ID
+   * Gets as single item from the database
+   */
   public getSingleItem(_id: string): Observable<any> {
     return this.http.post(
       this.ApiPrefix + this.appRoutes.getSingleItem,
@@ -43,6 +97,9 @@ export class DataService {
     );
   }
 
+  /**
+   * POST - Adds an item to the database
+   */
   public addANewItem(newItem: INewItem): Observable<any> {
     return this.http.post(
       this.ApiPrefix + this.appRoutes.initAddProduct,
@@ -55,6 +112,11 @@ export class DataService {
     );
   }
 
+  /**
+   * POST - user ID
+   * Gets all the items accociated with a single user
+   * This is called when a user is logged in
+   */
   public getSingleUserItems(): Observable<any> {
     const userID = this.fetchUserIdFromLS();
     return this.http.post(
@@ -66,6 +128,10 @@ export class DataService {
     );
   }
 
+  /**
+   * POST
+   * This updtes the following status of an item in the database
+   */
   public updateFollowStatus(selectedItem: IItem, followBool: boolean) {
     return this.http.post(
       this.ApiPrefix + this.appRoutes.updateFollow,
@@ -74,6 +140,10 @@ export class DataService {
     );
   }
 
+  /**
+   * POST
+   * Sends a request to the server with an updated price
+   */
   public manuallyUpdatePrice(selectedItem: IItem) {
     return this.http.post(
       this.ApiPrefix + this.appRoutes.updateItem,
@@ -85,6 +155,10 @@ export class DataService {
     );
   }
 
+  /**
+   * POST
+   * Removes and item from the database
+   */
   public removeItem(selectedItem: IItem) {
     const userID = this.fetchUserIdFromLS();
     return this.http.post(
@@ -97,6 +171,9 @@ export class DataService {
     );
   }
 
+  /**
+   * Adds items to local storage when they come back from the server
+   */
   public addItemsToLocalStorage(items: IItem[]) {
     if (localStorage.getItem('items')) {
       localStorage.removeItem('items');
@@ -104,6 +181,9 @@ export class DataService {
     localStorage.setItem('items', JSON.stringify(items));
   }
 
+  /**
+   * Gets items from local storage
+   */
   public getItemsFromLocalStorage() {
     if (localStorage.getItem('items')) {
       return JSON.parse(localStorage.getItem('items'));
@@ -111,10 +191,27 @@ export class DataService {
     return false;
   }
 
+  /**
+   * Clears local storage
+   */
   public clearLocalStorage() {
     localStorage.clear();
   }
 
+  public addUserIDtoLS(userId: string) {
+    if (localStorage.getItem('userId')) {
+      localStorage.removeItem('userId');
+    }
+    localStorage.setItem('userId', JSON.stringify(userId));
+  }
+
+  public logoutUserLS() {
+    localStorage.removeItem('userId');
+  }
+
+  /**
+   * Gets user ID from local storage
+   */
   public fetchUserIdFromLS() {
     return localStorage.getItem('userId');
   }
