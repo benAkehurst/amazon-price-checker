@@ -220,6 +220,8 @@ export class DataService {
 
   public logoutUserLS() {
     localStorage.removeItem('userId');
+    localStorage.removeItem('loggedIn');
+    localStorage.removeItem('items');
   }
 
   /**
