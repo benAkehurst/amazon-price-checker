@@ -12,8 +12,8 @@ export class DataService {
   private headers = new HttpHeaders({ 'Content-Type': 'application/json' });
   private ApiPrefix = 'http://localhost:3000/';
   private appRoutes = {
-    createUser: 'user/create',
-    loginUser: 'user/login',
+    createUser: 'api/user/create',
+    loginUser: 'api/user/login',
     getAll: 'api/get-all-product-data',
     getFollowed: 'api/get-all-followed-items',
     getSingleItem: 'api/fetch-single-item',
@@ -34,15 +34,10 @@ export class DataService {
   /**
    * Create User
    */
-  public createNewUser(
-    Uname: IUser,
-    Uemail: IUser,
-    Upassword: IUser
-  ): Observable<any> {
+  public createNewUser(Uemail: string, Upassword: string): Observable<any> {
     return this.http.post(
       this.ApiPrefix + this.appRoutes.createUser,
       {
-        name: Uname,
         email: Uemail,
         password: Upassword
       },
@@ -53,7 +48,7 @@ export class DataService {
   /**
    * Login User
    */
-  public loginUser(Uemail: IUser, Upassword: IUser): Observable<any> {
+  public loginUser(Uemail: string, Upassword: string): Observable<any> {
     return this.http.post(
       this.ApiPrefix + this.appRoutes.loginUser,
       {

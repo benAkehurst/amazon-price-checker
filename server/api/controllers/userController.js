@@ -34,7 +34,7 @@ exports.get_all_users = (req, res) => {
  */
 exports.create_a_user = (req, res) => {
   let newUser = new User({
-    name: req.body.name,
+    name: undefined,
     email: req.body.email,
     password: bcrypt.hashSync(req.body.password, 10)
   });
