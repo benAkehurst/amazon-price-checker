@@ -85,7 +85,7 @@ export class SingleItemPage implements OnInit {
       this.dataService
         .updateFollowStatus(this.singleItem, false)
         .subscribe(response => {
-          this.showAlert(`Following Status: ${response.obj.following}`);
+          // this.showAlert(`Following Status: ${response.obj.following}`);
           this.isDeleting = false;
         });
     }
