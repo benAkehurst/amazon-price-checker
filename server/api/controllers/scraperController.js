@@ -49,6 +49,7 @@ exports.get_single_item = (req, res) => {
 };
 
 exports.get_single_user_items = (req, res) => {
+  console.log('In single user items');
   let userId = req.body.userId;
   SingleItem.find({ users: { $all: [userId] } }, (err, data) => {
     if (err) {
@@ -114,7 +115,7 @@ exports.first_scrape = (req, res) => {
           price: data.priceInt,
           following: follow,
           targetPrice: target,
-          users: userId
+          users: JSON.parse(userId)
         });
         newItem.save((err, item) => {
           if (err) {
@@ -133,11 +134,7 @@ exports.first_scrape = (req, res) => {
             { $push: { user_items: item._id } },
             (err, done) => {
               if (err) {
-                res.send({
-                  error: err,
-                  message: "Couldn't create item in database",
-                  code: 400
-                });
+                console.log(err);
               }
             }
           );

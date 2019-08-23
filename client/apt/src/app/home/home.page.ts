@@ -22,7 +22,7 @@ export class HomePage implements OnInit {
   }
 
   ionViewWillEnter() {
-    this.getItemsFromDB();
+    this.getAllItems();
   }
 
   /**

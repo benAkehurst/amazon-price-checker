@@ -114,7 +114,7 @@ export class DataService {
    * This is called when a user is logged in
    */
   public getSingleUserItems(): Observable<any> {
-    const userID = this.fetchUserIdFromLS();
+    const userID = JSON.parse(this.fetchUserIdFromLS());
     return this.http.post(
       this.ApiPrefix + this.appRoutes.getSingleUserItems,
       {
