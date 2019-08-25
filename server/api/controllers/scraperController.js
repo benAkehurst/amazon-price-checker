@@ -106,42 +106,35 @@ exports.first_scrape = (req, res) => {
     follow = false;
   }
   scraper(url)
-    .then(data => {
-      if (data) {
+    .then(result => {
+      console.log(result);
+      console.log(userId);
+      if (result) {
         let newItem = new SingleItem({
-          name: data.title,
+          name: result.title,
           link: url,
-          imgUrl: data.imgUrl,
-          price: data.priceInt,
+          imgUrl: result.imgUrl,
+          price: result.priceInt,
           following: follow,
           targetPrice: target,
-          users: JSON.parse(userId)
+          users: userId
         });
-        newItem.save((err, item) => {
+        newItem.save((err, result) => {
           if (err) {
             res.send({
-              error: err,
-              message: "Couldn't create item in database",
-              code: 400
+              success: false,
+              msg: 'Failed to save in database',
+              error: err
             });
           }
           let itemCollection = new Items({
-            uid: item._id
+            uid: result._id
           });
           itemCollection.save();
-          User.update(
-            { _id: userId },
-            { $push: { user_items: item._id } },
-            (err, done) => {
-              if (err) {
-                console.log(err);
-              }
-            }
-          );
           res.status(201).json({
             message: 'Item found and saved in database',
             success: true,
-            obj: item
+            obj: result
           });
         });
       }
@@ -243,18 +236,15 @@ exports.delete_item = (req, res) => {
 };
 
 let scraper = async url => {
-  console.log('Accessing Amazon to fetch item data');
   const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
-  console.log('Going to chosen URL');
   await page.goto(url);
   await page.waitFor(1000);
-  console.log('At chosen page and starting scrape');
   const result = await page.evaluate(() => {
     let title = document.querySelector('#productTitle').innerText;
     let imgUrl = document.querySelector('#imgTagWrapperId > img').src;
     let priceStr = document.querySelector('#priceblock_ourprice').innerText;
-    let priceInt = parseInt(priceStr.replace(/£/g, '').replace(/,/g, ''));
+    let priceInt = parseInt(priceStr.replace(/£/g, ''));
     return {
       title,
       imgUrl,
@@ -360,14 +350,8 @@ function mailConfig(dataObj) {
   const mailOptions = {
     from: `${dataObj.user.email}`,
     to: `${dataObj.user.email}`,
-    subject: `AMAZON PRICE TRACK - ${
-      dataObj.data.name
-    } HAS HIT THE TARGET PRICE`,
-    html: `<p>The ${
-      dataObj.data.name
-    } you wanted to buy is now at your target price! <a href="${
-      dataObj.data.link
-    }">Buy it HERE!</a></p>`
+    subject: `AMAZON PRICE TRACK - ${dataObj.data.name} HAS HIT THE TARGET PRICE`,
+    html: `<p>The ${dataObj.data.name} you wanted to buy is now at your target price! <a href="${dataObj.data.link}">Buy it HERE!</a></p>`
   };
   const transporter = nodemailer.createTransport({
     service: 'gmail',

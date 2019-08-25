@@ -4,6 +4,7 @@ const http = require('http');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+require('dotenv').config();
 
 // Models Imports
 const User = require('./api/models/userModel');
@@ -17,6 +18,7 @@ const app = express();
 // DB Connection
 const dbName = 'amazon_products_db';
 mongoose.Promise = global.Promise;
+mongoose.set('useCreateIndex', true);
 mongoose.connect(
   /**
    * TODO: CHANGE THE DB LOCATION LOCALLY TO YOUR DB NAME OF CHOICE
@@ -24,8 +26,7 @@ mongoose.connect(
    */
   `mongodb://localhost:27017/${dbName}`,
   {
-    useNewUrlParser: true,
-    useCreateIndex: true
+    useNewUrlParser: true
   },
   e => {
     if (e) {
@@ -35,13 +36,12 @@ mongoose.connect(
       };
       console.log(dbError);
     } else {
-      console.log(`Connected to Database: ${dbName}`);
+      console.log(`Connected to Database: ${dbName} - dev databse`);
     }
   }
 );
 
 // Server Config
-require('dotenv').config();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
