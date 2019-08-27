@@ -11,7 +11,6 @@ import { IUser } from '../interfaces/user.interface';
 export class DataService {
   private headers = new HttpHeaders({ 'Content-Type': 'application/json' });
   private ApiPrefixLocal = 'http://localhost:3000/';
-  private ApiPrefixProd = 'https://amazon-price-tracker-lite.herokuapp.com/';
   private appRoutes = {
     createUser: 'api/user/create',
     loginUser: 'api/user/login',
