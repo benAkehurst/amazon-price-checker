@@ -90,25 +90,16 @@ exports.get_all_followed_items = (req, res) => {
 };
 
 exports.first_scrape = (req, res) => {
+  console.log(req.body);
   let userId = req.body.userId;
   let url = req.body.url;
   let follow = req.body.follow;
   let target = req.body.targetPrice;
-  let checkUrl = validURL(url);
-  if (!checkUrl) {
-    res.send({
-      msg: 'You have provided a bad url',
-      success: false
-    });
-    return;
-  }
   if (follow === null) {
     follow = false;
   }
   scraper(url)
     .then(result => {
-      console.log(result);
-      console.log(userId);
       if (result) {
         let newItem = new SingleItem({
           name: result.title,
@@ -236,7 +227,14 @@ exports.delete_item = (req, res) => {
 };
 
 let scraper = async url => {
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage'
+    ]
+  });
   const page = await browser.newPage();
   await page.goto(url);
   await page.waitFor(1000);
@@ -256,7 +254,8 @@ let scraper = async url => {
 };
 
 function validURL(str) {
-  if (str.indexOf('amazon') > -1) {
+  const substring = 'amazon';
+  if (str.indexOf(substring) !== -1) {
     return true;
   }
   return false;

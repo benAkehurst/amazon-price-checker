@@ -102,10 +102,11 @@ export class DataService {
     const userID = JSON.parse(this.fetchUserIdFromLS());
     const data = {
       userId: userID,
-      url: this.checkUrlString(newItem.url),
+      url: newItem.url,
       follow: newItem.following,
       targetPrice: newItem.targetPrice
     };
+    console.log(data);
     return this.http.post(
       this.ApiPrefixProd + this.appRoutes.initAddProduct,
       data,
@@ -234,11 +235,13 @@ export class DataService {
     return localStorage.getItem('userId');
   }
 
-  public checkUrlString(url: string) {
-    const addition = 'https://www.';
-    if (!url.includes(addition)) {
-      const res = addition.concat(url);
-      return res;
-    }
-  }
+  // public checkUrlString(url: string) {
+  //   const addition = 'https://www.';
+  //   console.log(url);
+  //   if (!url.includes(addition)) {
+  //     let 
+  //     return true;
+  //   }
+  //   return false;
+  // }
 }
