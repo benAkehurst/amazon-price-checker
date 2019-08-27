@@ -253,14 +253,6 @@ let scraper = async url => {
   return result;
 };
 
-function validURL(str) {
-  const substring = 'amazon';
-  if (str.indexOf(substring) !== -1) {
-    return true;
-  }
-  return false;
-}
-
 cron.schedule('0 */6 * * *', () => {
   SingleItem.find({}, (err, items) => {
     let followedItems = [];
