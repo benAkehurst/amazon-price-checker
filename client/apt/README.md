@@ -1,12 +1,8 @@
 # Amazon Price Checker Ionic Client
 
-## Deploying
+1. Enter the client folder, and then the apt subfolder.
 
-1. Datbase
+2. Run ```npm i``` to install the node_modules.
 
-2. Server Url
+3. Run ```ionic serve``` to serve the client.
 
-3. Firebase Project
-
-4. Firebase Deploy
-[Link to Ionic Deploy Docs](https://ionicframework.com/docs/publishing/progressive-web-app)
