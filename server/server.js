@@ -2,9 +2,10 @@
 const express = require('express');
 const http = require('http');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
 const cors = require('cors');
-require('dotenv').config();
+const morgan = require('morgan');
+const winston = require('./config/winston');
+const helmet = require('helmet');
 
 // Models Imports
 const User = require('./api/models/userModel');
@@ -14,38 +15,45 @@ const Deleted = require('./api/models/deletedModel');
 
 // Init Express
 const app = express();
+require('dotenv').config();
 
 // DB Connection
-const dbName = 'amazon_products_db';
 mongoose.Promise = global.Promise;
-mongoose.set('useCreateIndex', true);
+let dev = process.env.DEV;
 mongoose.connect(
-  /**
-   * TODO: CHANGE THE DB LOCATION LOCALLY TO YOUR DB NAME OF CHOICE
-   * OR IN .env CONNECT DB TO REMOTE ADDRESS
-   */
-  `mongodb://localhost:27017/${dbName}`,
+  dev
+    ? `mongodb://${process.env.LOCAL_DB}`
+    : `mongodb://${process.env.PROD_DB}`,
   {
-    useNewUrlParser: true
+    useNewUrlParser: true,
+    useFindAndModify: false,
+    useCreateIndex: true,
+    useUnifiedTopology: true,
   },
-  e => {
+  (e) => {
     if (e) {
       const dbError = {
         error: e,
-        msg: 'Error Connecting to Database. Please check MongoDB is running'
+        msg: 'Error Connecting to Database. Please check MongoDB is running',
       };
       console.log(dbError);
     } else {
-      console.log(`Connected to Database: ${dbName} - dev databse`);
+      console.log(`Connected to ${dev ? 'Development' : 'Prod'} Database`);
     }
   }
 );
 
 // Server Config
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(express.json());
+app.use(
+  express.urlencoded({
+    extended: true,
+  })
+);
+app.use(morgan('combined', { stream: winston.stream }));
+app.use(helmet());
 
-// Cors Controls
+// Cors Config
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader(
@@ -70,11 +78,12 @@ scraperRoutes(app);
 
 // 404 Handling
 app.use((req, res) => {
+  winston.error(`'Hit 404' - ${req.originalUrl} - ${req.method} - ${req.ip}`);
   res.status(404).send({ url: req.originalUrl + ' not found' });
 });
 
 // Server Port Controls
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || '3000';
 app.set('port', port);
 const server = http.createServer(app);
-server.listen(port, () => console.log(`API running on localhost:${port}, time: ${new Date()}`));
+server.listen(port, () => console.log(`API running on localhost:${port}`));
