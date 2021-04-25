@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const User = mongoose.model('User');
 const SingleItem = mongoose.model('SingleItem');
 const Items = mongoose.model('Items');
-const Deleted = mongoose.model('Deleted');
 
 const fs = require('fs');
 const puppeteer = require('puppeteer');
@@ -18,14 +17,14 @@ exports.get_all_items = (req, res) => {
         error: err,
         message: 'No items fround',
         code: 204,
-        success: false
+        success: false,
       });
     }
     res.send({
       message: 'All items returned',
       data: items,
       code: 200,
-      success: true
+      success: true,
     });
   });
 };
@@ -37,13 +36,13 @@ exports.get_single_item = (req, res) => {
       res.send({
         error: err,
         message: "Couldn't find the requested item",
-        code: 400
+        code: 400,
       });
     }
     res.send({
       message: 'Item found',
       data: item,
-      code: 200
+      code: 200,
     });
   });
 };
@@ -55,13 +54,13 @@ exports.get_single_user_items = (req, res) => {
     if (err) {
       res.send({
         msg: 'user or items not found',
-        success: false
+        success: false,
       });
     }
     res.send({
       success: true,
       msg: 'All user Items found',
-      data: data
+      data: data,
     });
   });
 };
@@ -69,7 +68,7 @@ exports.get_single_user_items = (req, res) => {
 exports.get_all_followed_items = (req, res) => {
   SingleItem.find({}, (err, items) => {
     let followedItems = [];
-    items.forEach(e => {
+    items.forEach((e) => {
       if (e.following === true) {
         followedItems.push(e);
       }
@@ -78,13 +77,13 @@ exports.get_all_followed_items = (req, res) => {
       res.send({
         msg: 'No followed items',
         success: false,
-        error: err
+        error: err,
       });
     }
     res.send({
       msg: 'Followed Items',
       success: true,
-      data: followedItems
+      data: followedItems,
     });
   });
 };
@@ -99,7 +98,7 @@ exports.first_scrape = (req, res) => {
     follow = false;
   }
   scraper(url)
-    .then(result => {
+    .then((result) => {
       if (result) {
         let newItem = new SingleItem({
           name: result.title,
@@ -108,32 +107,32 @@ exports.first_scrape = (req, res) => {
           price: result.priceInt,
           following: follow,
           targetPrice: target,
-          users: userId
+          users: userId,
         });
         newItem.save((err, result) => {
           if (err) {
             res.send({
               success: false,
               msg: 'Failed to save in database',
-              error: err
+              error: err,
             });
           }
           let itemCollection = new Items({
-            uid: result._id
+            uid: result._id,
           });
           itemCollection.save();
           res.status(201).json({
             message: 'Item found and saved in database',
             success: true,
-            obj: result
+            obj: result,
           });
         });
       }
     })
-    .catch(err => {
+    .catch((err) => {
       res.send({
         err: err,
-        msg: 'Error - something went wrong scraping the item'
+        msg: 'Error - something went wrong scraping the item',
       });
     });
 };
@@ -145,7 +144,7 @@ exports.update_item = (req, res) => {
   if (updatePrice) {
     res.send({
       success: true,
-      message: 'Item updated successfully'
+      message: 'Item updated successfully',
     });
   }
 };
@@ -160,13 +159,13 @@ exports.change_tracking = (req, res) => {
         res.send({
           error: err,
           message: "Couldn't update following status",
-          success: false
+          success: false,
         });
       }
       res.send({
         message: 'Item updated',
         success: true,
-        obj: updatedItem
+        obj: updatedItem,
       });
     });
   });
@@ -192,19 +191,16 @@ exports.delete_item = (req, res) => {
         error: err,
         message: "Couldn't find the requested item",
         success: false,
-        code: 400
+        code: 400,
       });
     }
-    let newItem = new Deleted({
-      item: document
-    });
     newItem.save((err, item) => {
       if (err) {
         res.send({
           error: err,
           message: "Couldn't find the requested item",
           success: false,
-          code: 400
+          code: 400,
         });
       }
     });
@@ -215,25 +211,25 @@ exports.delete_item = (req, res) => {
         error: err,
         message: "Couldn't find the requested item",
         success: false,
-        code: 400
+        code: 400,
       });
     }
     console.log('Item removed from items db');
   });
   res.send({
     message: 'Item deleted from database',
-    success: true
+    success: true,
   });
 };
 
-let scraper = async url => {
+let scraper = async (url) => {
   const browser = await puppeteer.launch({
     headless: true,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage'
-    ]
+      '--disable-dev-shm-usage',
+    ],
   });
   const page = await browser.newPage();
   await page.goto(url);
@@ -246,7 +242,7 @@ let scraper = async url => {
     return {
       title,
       imgUrl,
-      priceInt
+      priceInt,
     };
   });
   browser.close();
@@ -256,7 +252,7 @@ let scraper = async url => {
 cron.schedule('0 */6 * * *', () => {
   SingleItem.find({}, (err, items) => {
     let followedItems = [];
-    items.forEach(e => {
+    items.forEach((e) => {
       if (e.following === true) {
         followedItems.push(e);
       }
@@ -264,10 +260,10 @@ cron.schedule('0 */6 * * *', () => {
     if (err) {
       console.log({
         error: err,
-        msg: 'Failed to update item'
+        msg: 'Failed to update item',
       });
     }
-    followedItems.forEach(e => {
+    followedItems.forEach((e) => {
       console.log('Updating');
       cron_update_item(e._id, e.targetPrice);
     });
@@ -278,12 +274,12 @@ let cron_update_item = async (id, targetPrice) => {
   let itemId = id;
   await SingleItem.findById(itemId, (err, item) => {
     scraper(item.link)
-      .then(data => {
+      .then((data) => {
         if (data) {
           let newObj = {
             tite: data.title,
             price: data.priceInt,
-            date: Date.now().toString()
+            date: Date.now().toString(),
           };
           SingleItem.findOneAndUpdate(
             { _id: itemId },
@@ -292,7 +288,7 @@ let cron_update_item = async (id, targetPrice) => {
               if (err) {
                 return {
                   success: false,
-                  error: err
+                  error: err,
                 };
               }
               if (newObj.price < targetPrice) {
@@ -300,23 +296,23 @@ let cron_update_item = async (id, targetPrice) => {
               }
               let log = {
                 msg: `Cron Job Run`,
-                time: new Date()
+                time: new Date(),
               };
               console.log('Scraping item');
               fs.writeFileSync('./logs/cron.json', JSON.stringify(log), {
                 encoding: 'utf8',
-                flag: 'a'
+                flag: 'a',
               });
               return;
             }
           );
         }
       })
-      .catch(err => {
+      .catch((err) => {
         return {
           success: false,
           message: 'Major error',
-          error: err
+          error: err,
         };
       });
   });
@@ -329,7 +325,7 @@ function sendEmail(itemId) {
       .exec((err, user) => {
         let dataObj = {
           data: doc,
-          user: user
+          user: user,
         };
         mailConfig(dataObj);
       });
@@ -342,14 +338,14 @@ function mailConfig(dataObj) {
     from: `${dataObj.user.email}`,
     to: `${dataObj.user.email}`,
     subject: `AMAZON PRICE TRACK - ${dataObj.data.name} HAS HIT THE TARGET PRICE`,
-    html: `<p>The ${dataObj.data.name} you wanted to buy is now at your target price! <a href="${dataObj.data.link}">Buy it HERE!</a></p>`
+    html: `<p>The ${dataObj.data.name} you wanted to buy is now at your target price! <a href="${dataObj.data.link}">Buy it HERE!</a></p>`,
   };
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
       user: process.env.GMAIL_LOGIN,
-      pass: process.env.GMAIL_PASSWORD
-    }
+      pass: process.env.GMAIL_PASSWORD,
+    },
   });
   transporter.sendMail(mailOptions, (err, info) => {
     if (err) {
