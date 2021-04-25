@@ -30,6 +30,9 @@ const UserSchema = new Schema(
       type: String,
       required: false,
     },
+    userAcquisitionLocation: {
+      type: String,
+    },
     userItems: {
       type: Array,
     },
@@ -40,9 +43,6 @@ const UserSchema = new Schema(
     userActive: {
       type: Boolean,
       default: false,
-    },
-    userAcquisitionLocation: {
-      type: String,
     },
   },
   { timestamps: true }

@@ -151,8 +151,6 @@ exports.create_new_user = async (req, res) => {
     });
   } else {
     try {
-      const customerId = `_${Math.random().toString(36).substr(2, 8)}`;
-      const generatedQrCode = await generateQRCode(customerId);
       const newUser = new User({
         firstName: firstName ? firstName : '',
         lastName: lastName ? lastName : '',
@@ -161,9 +159,8 @@ exports.create_new_user = async (req, res) => {
         acceptedTerms: true,
         createdOnDate: format(new Date(), 'dd/MM/yyyy'),
         uniqueId: uuidv4(),
-        qrCode: generatedQrCode,
-        customerId: customerId,
         userAcquisitionLocation: 'Manual Registration Form',
+        userItems: [],
       });
       const user = await newUser.save();
       const baseUrl = req.protocol + '://' + req.get('host');
@@ -180,7 +177,7 @@ exports.create_new_user = async (req, res) => {
         to: user.email,
         subject: 'Your Activation Link for YOUR APP',
         text: `Please use the following link within the next 10 minutes to activate your account on YOUR APP: ${baseUrl}/api/auth/verification/verify-account/${user.uniqueId}/${secretCode}`,
-        html: `<p>Please use the following link within the next 10 minutes to activate your account on YOUR APP: <strong><a href="${baseUrl}/api/v1/auth/verification/verify-account/${user.uniqueId}/${secretCode}" target="_blank">Email Verification Link</a></strong></p>`,
+        html: `<p>Please use the following link within the next 10 minutes to activate your account on YOUR APP: <strong><a href="${baseUrl}/api/v2/auth/verification/verify-account/${user.uniqueId}/${secretCode}" target="_blank">Email Verification Link</a></strong></p>`,
       };
       await sendEmail(data);
       const token = jwt.sign(
