@@ -8,10 +8,11 @@ const winston = require('./config/winston');
 const helmet = require('helmet');
 
 // Models Imports
-const User = require('./api/models/userModel');
-const SingleItem = require('./api/models/singleItemModel');
-const Items = require('./api/models/itemsModel');
-const Deleted = require('./api/models/deletedModel');
+const User = require('./api/models/user.model');
+const SingleItem = require('./api/models/singleItem.model');
+const Items = require('./api/models/items.model');
+const Access = require('./api/models/access.model');
+const Code = require('./api/models/code.model');
 
 // Init Express
 const app = express();
@@ -69,12 +70,12 @@ app.use((req, res, next) => {
 app.use(cors());
 
 // Routes Definitions
-const userRoutes = require('./api/routes/userRoutes');
-const authRoutes = require('./api/routes/authRoutes');
-const scraperRoutes = require('./api/routes/scraperRoutes');
-userRoutes(app);
+const authRoutes = require('./api/routes/auth.routes');
+const scraperRoutes = require('./api/routes/scraper.routes');
+const userRoutes = require('./api/routes/user.routes');
 authRoutes(app);
 scraperRoutes(app);
+userRoutes(app);
 
 // 404 Handling
 app.use((req, res) => {
