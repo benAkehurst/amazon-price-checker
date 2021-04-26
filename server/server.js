@@ -10,7 +10,6 @@ const helmet = require('helmet');
 // Models Imports
 const User = require('./api/models/user.model');
 const SingleItem = require('./api/models/singleItem.model');
-const Items = require('./api/models/items.model');
 const Access = require('./api/models/access.model');
 const Code = require('./api/models/code.model');
 
