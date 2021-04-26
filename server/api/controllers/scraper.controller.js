@@ -9,6 +9,7 @@ const {
   checkToken,
 } = require('../../middlewares/validators');
 const { v4: uuidv4 } = require('uuid');
+const _ = require('lodash');
 
 /**
  * Method to do an initial scrape of item data and save to user
@@ -104,11 +105,45 @@ exports.createInitialItem = async (req, res) => {
  * Params - /:token/:uniqueId
  */
 exports.fetchAllTrackedItems = async (req, res) => {
-  res.status(400).json({
-    success: false,
-    message: 'Please provide all data required.',
-    data: null,
-  });
+  const { token, uniqueId } = req.params;
+  if (!uniqueId || !token) {
+    res.status(400).json({
+      success: false,
+      message: 'Please provide all data required.',
+      data: null,
+    });
+  } else {
+    try {
+      const tokenValid = await checkToken(token);
+      const user = await User.findOne({ uniqueId: uniqueId });
+      if (!tokenValid) {
+        res.status(501).json({
+          success: false,
+          message: 'Token not valid.',
+          data: null,
+        });
+      } else if (!user) {
+        res.status(501).json({
+          success: false,
+          message: 'User not found.',
+          data: null,
+        });
+      } else {
+        let items = _.pick(user.toObject(), ['trackedItems']);
+        res.status(200).json({
+          success: true,
+          message: 'Got user items',
+          data: items,
+        });
+      }
+    } catch {
+      res.status(500).json({
+        success: false,
+        message: 'Something went wrong fetching initial item details.',
+        data: null,
+      });
+    }
+  }
 };
 
 /**
