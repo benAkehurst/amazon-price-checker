@@ -33,7 +33,7 @@ const UserSchema = new Schema(
     userAcquisitionLocation: {
       type: String,
     },
-    userItems: {
+    trackedItems: {
       type: Array,
     },
     isAdmin: {

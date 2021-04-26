@@ -9,7 +9,7 @@ const {
   checkEmailExists,
   validateEmail,
 } = require('../../middlewares/validators');
-const { sendEmail } = require('../../middlewares/utils/emailService');
+const { sendEmail } = require('../../middlewares/services/emailService');
 const User = require('../models/user.model');
 const Code = require('../models/code.model');
 const { OAuth2Client } = require('google-auth-library');
@@ -69,7 +69,7 @@ exports.login_user = async (req, res) => {
         }
       }
     } catch {
-      res.status(400).json({
+      res.status(500).json({
         success: false,
         message: 'Something went wrong.',
         data: null,

@@ -4,37 +4,34 @@ const Schema = mongoose.Schema;
 
 const SingleItemSchema = new Schema({
   name: {
-    type: String
+    type: String,
   },
   link: {
-    type: String
+    type: String,
   },
   imgUrl: {
-    type: String
+    type: String,
   },
   price: {
-    type: Number
+    type: Number,
   },
   targetPrice: {
-    type: Number
+    type: Number,
   },
   following: {
-    type: Boolean
+    type: Boolean,
   },
   pastPrices: {
-    type: Array
+    type: Array,
   },
-  users: {
-    type: Array
-  },
-  created_date: {
+  createdDate: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
-  updated_date: {
+  lastUpdatedDate: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
 module.exports = mongoose.model('SingleItem', SingleItemSchema);
