@@ -5,22 +5,23 @@ module.exports = (app) => {
   app
     .route('/api/v2/scraper/create-initial-item/:token/:uniqueId')
     .post(scraperController.createInitialItem);
-
-  // /**
-  //  * Scraper Routes - Item Collection
-  //  */
-  // app.route('/api/get-all-product-data').get(scraperController.get_all_items);
-  // app
-  //   .route('/api/get-all-followed-items')
-  //   .get(scraperController.get_all_followed_items);
-  // app
-  //   .route('/api/get-single-user-items')
-  //   .post(scraperController.get_single_user_items);
-  // app.route('/api/fetch-single-item').post(scraperController.get_single_item);
-  // app.route('/api/initial-add-product').post(scraperController.first_scrape);
-  // app.route('/api/update-scraped-item').post(scraperController.update_item);
-  // app
-  //   .route('/api/update-scraped-following')
-  //   .post(scraperController.change_tracking);
-  // app.route('/api/remove-scraped-item').post(scraperController.delete_item);
+  app
+    .route('/api/v2/scraper/fetch-all-tracked-items/:token/:uniqueId')
+    .get(scraperController.fetchAllTrackedItems);
+  app
+    .route('/api/v2/scraper/update-all-user-prices/:token/:uniqueId')
+    .get(scraperController.updateAllUserPrices);
+  app
+    .route('/api/v2/scraper/update-prices-manually/:token/:uniqueId')
+    .get(scraperController.updatePricesManually);
+  app
+    .route(
+      '/api/v2/scraper/change-item-tracking/:token/:uniqueId/:itemUniqueId'
+    )
+    .post(scraperController.changeItemTracking);
+  app
+    .route(
+      '/api/v2/scraper/delete-item-from-tracking/:token/:uniqueId/:itemUniqueId'
+    )
+    .post(scraperController.deleteItemFromTracking);
 };

@@ -59,7 +59,11 @@ exports.login_user = async (req, res) => {
               expiresIn: rememberMe ? '48h' : '1h',
             }
           );
-          let userFiltered = _.pick(user.toObject(), ['uniqueId', 'isAdmin']);
+          let userFiltered = _.pick(user.toObject(), [
+            'firstName',
+            'uniqueId',
+            'trackedItems',
+          ]);
           userFiltered.token = token;
           res.status(200).json({
             success: true,
