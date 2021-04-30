@@ -1,5 +1,6 @@
 'use strict';
 const User = require('../models/user.model');
+const SingleItem = require('../models/singleItem.model');
 const {
   fetchInitialItemInfo,
   fetchCurrentItemPrice,
@@ -8,8 +9,11 @@ const {
   validateAmazonUrl,
   checkToken,
 } = require('../../middlewares/validators');
-const { v4: uuidv4 } = require('uuid');
 const _ = require('lodash');
+const {
+  UpdateSingleItemCurrentPrice,
+  UpdateSingleItemPastPrices,
+} = require('../data/scraper.data');
 
 /**
  * Method to do an initial scrape of item data and save to user
@@ -55,21 +59,21 @@ exports.createInitialItem = async (req, res) => {
           data: null,
         });
       } else {
-        const newSingleItem = {
+        const newSingleItem = new SingleItem({
           name: scrapedItem.title,
           link: itemUrl,
           imgUrl: scrapedItem.imgUrl,
-          price: scrapedItem.priceConverted,
+          currentPrice: scrapedItem.priceConverted,
           targetPrice: targetPrice,
           following: followItem,
           pastPrices: [],
-          itemUniqueId: uuidv4(),
-        };
+        });
+        const newSingleItemSaved = await newSingleItem.save();
         User.findOneAndUpdate(
           { uniqueId: uniqueId },
           {
             $push: {
-              trackedItems: newSingleItem,
+              trackedItems: newSingleItemSaved._id,
             },
           },
           { new: true },
@@ -162,14 +166,47 @@ exports.updateAllUserPrices = async (req, res) => {
 /**
  * Method that when called will go out and run a job to rescan for updated price on single item
  * GET
- * Params - /:token/:uniqueId
+ * Params - /:token/:uniqueId/:singleItemId/:singleItemLink
  */
-exports.updatePricesManually = async (req, res) => {
-  res.status(400).json({
-    success: false,
-    message: 'Please provide all data required.',
-    data: null,
-  });
+exports.updateSingleItemPrice = async (req, res) => {
+  const { token, uniqueId } = req.params;
+  const { singleItemId, singleItemLink } = req.body;
+  if (!uniqueId || !token || !singleItemId || !singleItemLink) {
+    res.status(400).json({
+      success: false,
+      message: 'Please provide all data required.',
+      data: null,
+    });
+  } else {
+    try {
+      const tokenValid = await checkToken(token);
+      if (!tokenValid.success) {
+        res.status(501).json({
+          success: false,
+          message: 'Token not valid.',
+          data: null,
+        });
+      } else {
+        await UpdateSingleItemPastPrices(singleItemId);
+        const currentItemPrice = await fetchCurrentItemPrice(singleItemLink);
+        const currentItemPriceDBWrite = await UpdateSingleItemCurrentPrice(
+          singleItemId,
+          currentItemPrice
+        );
+        res.status(200).json({
+          success: true,
+          message: 'Item price updated successfully.',
+          data: { currentItemPriceDBWrite },
+        });
+      }
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Something went wrong fetching initial item details.',
+        data: error,
+      });
+    }
+  }
 };
 
 /**
@@ -197,3 +234,18 @@ exports.deleteItemFromTracking = async (req, res) => {
     data: null,
   });
 };
+
+// function newFunction(err, res, userUpdated) {
+//   if (err) {
+//     res.status(500).json({
+//       success: false,
+//       message: 'Failed to scrape and update item.',
+//       data: null,
+//     });
+//   }
+//   res.status(201).json({
+//     success: true,
+//     message: 'Item price updated and saved successfully.',
+//     data: userUpdated.trackedItems,
+//   });
+// }

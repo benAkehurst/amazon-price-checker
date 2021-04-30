@@ -12,7 +12,7 @@ const SingleItemSchema = new Schema({
   imgUrl: {
     type: String,
   },
-  price: {
+  currentPrice: {
     type: Number,
   },
   targetPrice: {

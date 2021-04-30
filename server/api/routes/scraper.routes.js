@@ -12,8 +12,8 @@ module.exports = (app) => {
     .route('/api/v2/scraper/update-all-user-prices/:token/:uniqueId')
     .get(scraperController.updateAllUserPrices);
   app
-    .route('/api/v2/scraper/update-prices-manually/:token/:uniqueId')
-    .get(scraperController.updatePricesManually);
+    .route('/api/v2/scraper/update-single-item-price/:token/:uniqueId')
+    .post(scraperController.updateSingleItemPrice);
   app
     .route(
       '/api/v2/scraper/change-item-tracking/:token/:uniqueId/:itemUniqueId'
