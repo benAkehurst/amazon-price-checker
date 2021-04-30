@@ -9,16 +9,13 @@ module.exports = (app) => {
     .route('/api/v2/scraper/fetch-all-tracked-items/:token/:uniqueId')
     .get(scraperController.fetchAllTrackedItems);
   app
-    .route('/api/v2/scraper/update-all-user-prices/:token/:uniqueId')
-    .get(scraperController.updateAllUserPrices);
-  app
     .route('/api/v2/scraper/update-single-item-price/:token/:uniqueId')
     .post(scraperController.updateSingleItemPrice);
   app
     .route(
-      '/api/v2/scraper/change-item-tracking/:token/:uniqueId/:itemUniqueId'
+      '/api/v2/scraper/change-item-tracking/:token/:uniqueId/:itemUniqueId/:trackStatus'
     )
-    .post(scraperController.changeItemTracking);
+    .get(scraperController.changeItemTracking);
   app
     .route(
       '/api/v2/scraper/delete-item-from-tracking/:token/:uniqueId/:itemUniqueId'

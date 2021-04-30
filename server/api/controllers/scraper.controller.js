@@ -9,12 +9,15 @@ const {
   validateAmazonUrl,
   checkToken,
 } = require('../../middlewares/validators');
-const _ = require('lodash');
 const {
   AddNewItemIdToUser,
   UpdateSingleItemCurrentPrice,
   UpdateSingleItemPastPrices,
 } = require('../data/scraper.data');
+const {
+  FetchAllTrackedItems,
+  ChangeItemTracking,
+} = require('../data/items.data');
 
 /**
  * Method to do an initial scrape of item data and save to user
@@ -116,11 +119,12 @@ exports.fetchAllTrackedItems = async (req, res) => {
           data: null,
         });
       } else {
-        let items = _.pick(user.toObject(), ['trackedItems']);
+        let itemsIds = user.trackedItems;
+        let allItems = await FetchAllTrackedItems(itemsIds);
         res.status(200).json({
           success: true,
           message: 'Got user items',
-          data: items,
+          data: allItems,
         });
       }
     } catch {
@@ -134,22 +138,10 @@ exports.fetchAllTrackedItems = async (req, res) => {
 };
 
 /**
- * Method that when called will go out and run a job to rescan for updated prices
- * GET
- * Params - /:token/:uniqueId
- */
-exports.updateAllUserPrices = async (req, res) => {
-  res.status(400).json({
-    success: false,
-    message: 'Please provide all data required.',
-    data: null,
-  });
-};
-
-/**
  * Method that when called will go out and run a job to rescan for updated price on single item
- * GET
+ * POST
  * Params - /:token/:uniqueId/:singleItemId/:singleItemLink
+ * Body - singleItemId, singleItemLink
  */
 exports.updateSingleItemPrice = async (req, res) => {
   const { token, uniqueId } = req.params;
@@ -198,11 +190,38 @@ exports.updateSingleItemPrice = async (req, res) => {
  * Params - /:token/:uniqueId/:itemUniqueId
  */
 exports.changeItemTracking = async (req, res) => {
-  res.status(400).json({
-    success: false,
-    message: 'Please provide all data required.',
-    data: null,
-  });
+  const { token, uniqueId, itemUniqueId, trackStatus } = req.params;
+  if (!uniqueId || !token || !itemUniqueId || !trackStatus) {
+    res.status(400).json({
+      success: false,
+      message: 'Please provide all data required.',
+      data: null,
+    });
+  } else {
+    try {
+      const tokenValid = await checkToken(token);
+      if (!tokenValid.success) {
+        res.status(501).json({
+          success: false,
+          message: 'Token not valid.',
+          data: null,
+        });
+      } else {
+        const updated = await ChangeItemTracking(itemUniqueId, trackStatus);
+        res.status(200).json({
+          success: true,
+          message: 'Item tracking updated successfully.',
+          data: updated.following,
+        });
+      }
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Something went wrong fetching initial item details.',
+        data: error,
+      });
+    }
+  }
 };
 
 /**
@@ -218,17 +237,26 @@ exports.deleteItemFromTracking = async (req, res) => {
   });
 };
 
-// function newFunction(err, res, userUpdated) {
-//   if (err) {
-//     res.status(500).json({
-//       success: false,
-//       message: 'Failed to scrape and update item.',
-//       data: null,
-//     });
-//   }
-//   res.status(201).json({
-//     success: true,
-//     message: 'Item price updated and saved successfully.',
-//     data: userUpdated.trackedItems,
-//   });
-// }
+/**
+ * Method used internally when cron job is called
+ * @param {*} singleItemId
+ * @param {*} singleItemLink
+ * @returns
+ */
+exports.updateSingleItemPriceInternal = async (
+  singleItemId,
+  singleItemLink
+) => {
+  if (!singleItemId || !singleItemLink) {
+    return;
+  } else {
+    try {
+      await UpdateSingleItemPastPrices(singleItemId);
+      await fetchCurrentItemPrice(singleItemLink);
+      await UpdateSingleItemCurrentPrice(singleItemId, currentItemPrice);
+      return;
+    } catch {
+      return;
+    }
+  }
+};
