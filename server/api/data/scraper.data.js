@@ -1,4 +1,18 @@
+const User = require('../models/user.model');
 const SingleItem = require('../models/singleItem.model');
+
+const AddNewItemIdToUser = async (uniqueId, singleItemId) => {
+  const user = await User.findOneAndUpdate(
+    { uniqueId: uniqueId },
+    {
+      $push: {
+        trackedItems: singleItemId,
+      },
+    },
+    { new: true }
+  );
+  return user;
+};
 
 const UpdateSingleItemPastPrices = async (singleItemId) => {
   const item = await SingleItem.findOne({ _id: singleItemId });
@@ -28,6 +42,7 @@ const UpdateSingleItemCurrentPrice = async (singleItemId, newCurrentPrice) => {
 };
 
 module.exports = {
+  AddNewItemIdToUser,
   UpdateSingleItemCurrentPrice,
   UpdateSingleItemPastPrices,
 };

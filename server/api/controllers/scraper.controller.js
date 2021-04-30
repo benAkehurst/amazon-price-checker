@@ -11,6 +11,7 @@ const {
 } = require('../../middlewares/validators');
 const _ = require('lodash');
 const {
+  AddNewItemIdToUser,
   UpdateSingleItemCurrentPrice,
   UpdateSingleItemPastPrices,
 } = require('../data/scraper.data');
@@ -45,53 +46,35 @@ exports.createInitialItem = async (req, res) => {
     try {
       const tokenValid = await checkToken(token);
       const scrapedItem = await fetchInitialItemInfo(itemUrl);
-
+      const newSingleItem = new SingleItem({
+        name: scrapedItem.title,
+        link: itemUrl,
+        imgUrl: scrapedItem.imgUrl,
+        currentPrice: scrapedItem.priceConverted,
+        targetPrice: targetPrice,
+        following: followItem,
+        pastPrices: [],
+      });
       if (!scrapedItem) {
         res.status(500).json({
           success: false,
           message: 'Scrape of item failed',
           data: null,
         });
-      } else if (!tokenValid) {
+      } else if (!tokenValid.success) {
         res.status(501).json({
           success: false,
           message: 'Token not valid.',
           data: null,
         });
       } else {
-        const newSingleItem = new SingleItem({
-          name: scrapedItem.title,
-          link: itemUrl,
-          imgUrl: scrapedItem.imgUrl,
-          currentPrice: scrapedItem.priceConverted,
-          targetPrice: targetPrice,
-          following: followItem,
-          pastPrices: [],
-        });
         const newSingleItemSaved = await newSingleItem.save();
-        User.findOneAndUpdate(
-          { uniqueId: uniqueId },
-          {
-            $push: {
-              trackedItems: newSingleItemSaved._id,
-            },
-          },
-          { new: true },
-          (err, user) => {
-            if (err) {
-              res.status(500).json({
-                success: false,
-                message: 'Failed to scrape item or save item.',
-                data: null,
-              });
-            }
-            res.status(201).json({
-              success: true,
-              message: 'Item tracked and saved successfully.',
-              data: user.trackedItems,
-            });
-          }
-        );
+        const user = await AddNewItemIdToUser(uniqueId, newSingleItemSaved._id);
+        res.status(201).json({
+          success: true,
+          message: 'Item tracked and saved successfully.',
+          data: user.trackedItems,
+        });
       }
     } catch {
       res.status(500).json({
