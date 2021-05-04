@@ -1,3 +1,4 @@
+const User = require('../models/user.model');
 const SingleItem = require('../models/singleItem.model');
 
 const FetchAllTrackedItems = async (trackedItemsIds) => {
@@ -22,7 +23,13 @@ const ChangeItemTracking = async (itemId, trackStatus) => {
   return changedTracking;
 };
 
+const DeleteItemTracking = async (uniqueId, itemId) => {
+  const updatedItems = await SingleItem.findOneAndDelete({ _id: itemId });
+  return { updatedItems };
+};
+
 module.exports = {
   FetchAllTrackedItems,
   ChangeItemTracking,
+  DeleteItemTracking,
 };

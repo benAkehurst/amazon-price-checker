@@ -17,6 +17,7 @@ const {
 const {
   FetchAllTrackedItems,
   ChangeItemTracking,
+  DeleteItemTracking,
 } = require('../data/items.data');
 
 /**
@@ -229,12 +230,39 @@ exports.changeItemTracking = async (req, res) => {
  * GET
  * Params - /:token/:uniqueId/:itemUniqueId
  */
-exports.deleteItemFromTracking = async (req, res) => {
-  res.status(400).json({
-    success: false,
-    message: 'Please provide all data required.',
-    data: null,
-  });
+exports.deleteSingleItem = async (req, res) => {
+  const { token, uniqueId, itemUniqueId } = req.params;
+  if (!uniqueId || !token || !itemUniqueId) {
+    res.status(400).json({
+      success: false,
+      message: 'Please provide all data required.',
+      data: null,
+    });
+  } else {
+    try {
+      const tokenValid = await checkToken(token);
+      if (!tokenValid.success) {
+        res.status(501).json({
+          success: false,
+          message: 'Token not valid.',
+          data: null,
+        });
+      } else {
+        const deleted = await DeleteItemTracking(uniqueId, itemUniqueId);
+        res.status(200).json({
+          success: true,
+          message: 'Item deleted successfully.',
+          data: deleted,
+        });
+      }
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Something went wrong deleting item details.',
+        data: error,
+      });
+    }
+  }
 };
 
 /**

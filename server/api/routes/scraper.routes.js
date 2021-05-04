@@ -17,8 +17,6 @@ module.exports = (app) => {
     )
     .get(scraperController.changeItemTracking);
   app
-    .route(
-      '/api/v2/scraper/delete-item-from-tracking/:token/:uniqueId/:itemUniqueId'
-    )
-    .post(scraperController.deleteItemFromTracking);
+    .route('/api/v2/scraper/delete-single-item/:token/:uniqueId/:itemUniqueId')
+    .delete(scraperController.deleteSingleItem);
 };
