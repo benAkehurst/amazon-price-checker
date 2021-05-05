@@ -2,21 +2,21 @@
 module.exports = (app) => {
   const scraperController = require('../controllers/scraper.controller');
 
-  /**
-   * Scraper Routes - Item Collection
-   */
-  app.route('/api/get-all-product-data').get(scraperController.get_all_items);
   app
-    .route('/api/get-all-followed-items')
-    .get(scraperController.get_all_followed_items);
+    .route('/api/v2/scraper/create-initial-item/:token/:userUID')
+    .post(scraperController.createInitialItem);
   app
-    .route('/api/get-single-user-items')
-    .post(scraperController.get_single_user_items);
-  app.route('/api/fetch-single-item').post(scraperController.get_single_item);
-  app.route('/api/initial-add-product').post(scraperController.first_scrape);
-  app.route('/api/update-scraped-item').post(scraperController.update_item);
+    .route('/api/v2/scraper/fetch-all-tracked-items/:token/:userUID')
+    .get(scraperController.fetchAllTrackedItems);
   app
-    .route('/api/update-scraped-following')
-    .post(scraperController.change_tracking);
-  app.route('/api/remove-scraped-item').post(scraperController.delete_item);
+    .route('/api/v2/scraper/update-single-item-price/:token/:userUID')
+    .post(scraperController.updateSingleItemPrice);
+  app
+    .route(
+      '/api/v2/scraper/change-item-tracking/:token/:userUID/:itemUniqueId/:trackStatus'
+    )
+    .get(scraperController.changeItemTracking);
+  app
+    .route('/api/v2/scraper/delete-single-item/:token/:userUID/:itemUniqueId')
+    .delete(scraperController.deleteSingleItem);
 };

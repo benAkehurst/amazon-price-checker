@@ -5,11 +5,11 @@ const User = mongoose.model('User');
 /**
  * Gets single user info
  * GET
- * PARAMS - /:uniqueId
+ * PARAMS - /:userUID
  */
 exports.fetch_user_information = async (req, res) => {
-  const { uniqueId } = req.params;
-  if (!uniqueId) {
+  const { userUID } = req.params;
+  if (!userUID) {
     res.status(400).json({
       success: false,
       message: 'Please provide unique ID!',
@@ -17,7 +17,7 @@ exports.fetch_user_information = async (req, res) => {
     });
   } else {
     try {
-      const user = await User.findOne({ uniqueId: uniqueId });
+      const user = await User.findOne({ userUID: userUID });
       if (!user) {
         res.status(400).json({
           success: false,

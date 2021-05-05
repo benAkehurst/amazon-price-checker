@@ -35,11 +35,49 @@ const checkEmailExists = (email) => {
 };
 
 const checkUserExists = async (uuid) => {
-  return User.findOne({ uniqueId: uuid }, (err, success) => {
+  return User.findOne({ userUID: uuid }, (err, success) => {
     if (err) {
       return false;
     } else if (success) {
       return true;
+    }
+  });
+};
+
+/**
+ * validateAmazonUrl checks if the supplied url contains amazon.co.uk
+ * @param {string} url
+ * @returns {Boolean} True or False
+ */
+const validateAmazonUrl = (url) => {
+  const re = /^https:\/\/www\.amazon\.co.uk\//;
+  return re.test(String(url).toLowerCase());
+};
+
+const checkToken = (req) => {
+  let token = req;
+  return new Promise((resolve, reject) => {
+    if (!token) {
+      reject({ success: false, message: 'No token' });
+    } else if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          reject({
+            success: false,
+            message: 'Token is not valid',
+          });
+        } else {
+          resolve({
+            success: true,
+            message: 'Token is valid',
+          });
+        }
+      });
+    } else {
+      reject({
+        success: false,
+        message: 'No Token supplied',
+      });
     }
   });
 };
@@ -49,4 +87,6 @@ module.exports = {
   validatePassword,
   checkEmailExists,
   checkUserExists,
+  validateAmazonUrl,
+  checkToken,
 };

@@ -26,14 +26,14 @@ const UserSchema = new Schema(
     createdOnDate: {
       type: String,
     },
-    uniqueId: {
+    userUID: {
       type: String,
       required: false,
     },
     userAcquisitionLocation: {
       type: String,
     },
-    userItems: {
+    trackedItems: {
       type: Array,
     },
     isAdmin: {
