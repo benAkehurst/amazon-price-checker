@@ -1,9 +1,9 @@
 const User = require('../models/user.model');
 const SingleItem = require('../models/singleItem.model');
 
-const AddNewItemIdToUser = async (uniqueId, singleItemId) => {
+const AddNewItemIdToUser = async (userUID, singleItemId) => {
   const user = await User.findOneAndUpdate(
-    { uniqueId: uniqueId },
+    { userUID: userUID },
     {
       $push: {
         trackedItems: singleItemId,

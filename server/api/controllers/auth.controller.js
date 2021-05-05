@@ -52,7 +52,7 @@ exports.login_user = async (req, res) => {
           });
         } else {
           let token = jwt.sign(
-            { username: user.uniqueId },
+            { username: user.userUID },
             process.env.JWT_SECRET,
             {
               // TODO: SET JWT TOKEN DURATION HERE
@@ -61,7 +61,7 @@ exports.login_user = async (req, res) => {
           );
           let userFiltered = _.pick(user.toObject(), [
             'firstName',
-            'uniqueId',
+            'userUID',
             'trackedItems',
           ]);
           userFiltered.token = token;
@@ -93,7 +93,7 @@ exports.login_user = async (req, res) => {
  *  "password2": "Abc123!"
  *  "acceptedTerms": true
  *  "createdOnDate": "string that clearly shows when a user is created"
- *  "uniqueId": "string with unique uuid for DB queries without exposing DB ID"
+ *  "userUID": "string with unique uuid for DB queries without exposing DB ID"
  * }
  */
 exports.create_new_user = async (req, res) => {
@@ -162,7 +162,7 @@ exports.create_new_user = async (req, res) => {
         password: bcrypt.hashSync(req.body.password, 14),
         acceptedTerms: true,
         createdOnDate: format(new Date(), 'dd/MM/yyyy'),
-        uniqueId: uuidv4(),
+        userUID: uuidv4(),
         userAcquisitionLocation: 'Manual Registration Form',
         userItems: [],
       });
@@ -180,19 +180,19 @@ exports.create_new_user = async (req, res) => {
         from: `YOUR NAME <${process.env.EMAIL_USERNAME}>`,
         to: user.email,
         subject: 'Your Activation Link for YOUR APP',
-        text: `Please use the following link within the next 10 minutes to activate your account on YOUR APP: ${baseUrl}/api/auth/verification/verify-account/${user.uniqueId}/${secretCode}`,
-        html: `<p>Please use the following link within the next 10 minutes to activate your account on YOUR APP: <strong><a href="${baseUrl}/api/v2/auth/verification/verify-account/${user.uniqueId}/${secretCode}" target="_blank">Email Verification Link</a></strong></p>`,
+        text: `Please use the following link within the next 10 minutes to activate your account on YOUR APP: ${baseUrl}/api/auth/verification/verify-account/${user.userUID}/${secretCode}`,
+        html: `<p>Please use the following link within the next 10 minutes to activate your account on YOUR APP: <strong><a href="${baseUrl}/api/v2/auth/verification/verify-account/${user.userUID}/${secretCode}" target="_blank">Email Verification Link</a></strong></p>`,
       };
       await sendEmail(data);
       const token = jwt.sign(
-        { username: user.uniqueId },
+        { username: user.userUID },
         process.env.JWT_SECRET,
         {
           // TODO: SET JWT TOKEN DURATION HERE
           expiresIn: '48h',
         }
       );
-      let userFiltered = _.pick(user.toObject(), ['uniqueId', 'isAdmin']);
+      let userFiltered = _.pick(user.toObject(), ['userUID', 'isAdmin']);
       userFiltered.token = token;
       res.status(201).json({
         success: true,
@@ -212,12 +212,12 @@ exports.create_new_user = async (req, res) => {
 /**
  * External facing route that listens for a user confirming their email.
  * GET
- * PARAMS: uniqueId & SecretCode
+ * PARAMS: userUID & SecretCode
  */
 exports.validate_user_email_and_account = async (req, res) => {
   try {
     const user = await User.findOne({
-      uniqueId: sanitize(req.params.uniqueId),
+      userUID: sanitize(req.params.userUID),
     });
     const response = await Code.findOne({
       email: user.email,
@@ -383,11 +383,11 @@ exports.verify_new_user_password = async (req, res) => {
  * PARAMS:
  * {
  * "password": "",
- * "uniqueId":""
+ * "userUID":""
  * }
  */
 exports.delete_user_account = async (req, res) => {
-  const { password, uniqueId } = req.body;
+  const { password, userUID } = req.body;
   if (!password) {
     res.status(400).json({
       success: false,
@@ -396,7 +396,7 @@ exports.delete_user_account = async (req, res) => {
     });
   } else {
     try {
-      const user = await User.findOne({ uniqueId: sanitize(uniqueId) });
+      const user = await User.findOne({ userUID: sanitize(userUID) });
       if (!user) {
         res.status(400).json({
           success: false,
@@ -533,7 +533,7 @@ const createUserFromGoogleRegister = async (userId, email, name) => {
       password: bcrypt.hashSync(userId, 14),
       acceptedTerms: true,
       createdOnDate: format(new Date(), 'dd/MM/yyyy'),
-      uniqueId: uuidv4(),
+      userUID: uuidv4(),
       qrCode: generatedQrCode,
       customerId: customerId,
       userActive: true,
@@ -558,15 +558,11 @@ const loginUserViaGoogleLogin = async (userId, email) => {
     if (!pwCheckSuccess) {
       return false;
     } else {
-      let token = jwt.sign(
-        { username: user.uniqueId },
-        process.env.JWT_SECRET,
-        {
-          // TODO: SET JWT TOKEN DURATION HERE
-          expiresIn: '48h',
-        }
-      );
-      let userFiltered = { uniqueId: user.uniqueId, isAdmin: user.isAdmin };
+      let token = jwt.sign({ username: user.userUID }, process.env.JWT_SECRET, {
+        // TODO: SET JWT TOKEN DURATION HERE
+        expiresIn: '48h',
+      });
+      let userFiltered = { userUID: user.userUID, isAdmin: user.isAdmin };
       userFiltered.token = token;
       return userFiltered;
     }

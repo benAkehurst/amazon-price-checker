@@ -26,7 +26,7 @@ const UserSchema = new Schema(
     createdOnDate: {
       type: String,
     },
-    uniqueId: {
+    userUID: {
       type: String,
       required: false,
     },

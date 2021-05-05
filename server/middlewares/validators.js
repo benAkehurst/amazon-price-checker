@@ -35,7 +35,7 @@ const checkEmailExists = (email) => {
 };
 
 const checkUserExists = async (uuid) => {
-  return User.findOne({ uniqueId: uuid }, (err, success) => {
+  return User.findOne({ userUID: uuid }, (err, success) => {
     if (err) {
       return false;
     } else if (success) {

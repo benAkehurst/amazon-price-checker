@@ -23,7 +23,7 @@ const ChangeItemTracking = async (itemId, trackStatus) => {
   return changedTracking;
 };
 
-const DeleteItemTracking = async (uniqueId, itemId) => {
+const DeleteItemTracking = async (userUID, itemId) => {
   const updatedItems = await SingleItem.findOneAndDelete({ _id: itemId });
   return { updatedItems };
 };

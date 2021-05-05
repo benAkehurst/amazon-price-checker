@@ -6,7 +6,7 @@ module.exports = (app) => {
     .route('/api/v2/auth/create-new-user')
     .post(authController.create_new_user);
   app
-    .route('/api/v2/auth/verification/verify-account/:uniqueId/:secretCode')
+    .route('/api/v2/auth/verification/verify-account/:userUID/:secretCode')
     .get(authController.validate_user_email_and_account);
   app
     .route('/api/v2/auth/password-reset/get-code')

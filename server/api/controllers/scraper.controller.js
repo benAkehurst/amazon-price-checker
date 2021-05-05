@@ -23,7 +23,7 @@ const {
 /**
  * Method to do an initial scrape of item data and save to user
  * POST
- * Params - /:token/:uniqueId
+ * Params - /:token/:userUID
  * Body - {
  *  "itemUrl": "amazon.co.uk url",
     "followItem": boolean,
@@ -31,10 +31,10 @@ const {
  * }
  */
 exports.createInitialItem = async (req, res) => {
-  const { token, uniqueId } = req.params;
+  const { token, userUID } = req.params;
   const { itemUrl, followItem, targetPrice } = req.body;
 
-  if (!uniqueId || !token || !itemUrl || !followItem || !targetPrice) {
+  if (!userUID || !token || !itemUrl || !followItem || !targetPrice) {
     res.status(400).json({
       success: false,
       message: 'Please provide all data required.',
@@ -73,7 +73,7 @@ exports.createInitialItem = async (req, res) => {
         });
       } else {
         const newSingleItemSaved = await newSingleItem.save();
-        const user = await AddNewItemIdToUser(uniqueId, newSingleItemSaved._id);
+        const user = await AddNewItemIdToUser(userUID, newSingleItemSaved._id);
         res.status(201).json({
           success: true,
           message: 'Item tracked and saved successfully.',
@@ -93,11 +93,11 @@ exports.createInitialItem = async (req, res) => {
 /**
  * Method to get all the items from a users tracked items
  * GET
- * Params - /:token/:uniqueId
+ * Params - /:token/:userUID
  */
 exports.fetchAllTrackedItems = async (req, res) => {
-  const { token, uniqueId } = req.params;
-  if (!uniqueId || !token) {
+  const { token, userUID } = req.params;
+  if (!userUID || !token) {
     res.status(400).json({
       success: false,
       message: 'Please provide all data required.',
@@ -106,7 +106,7 @@ exports.fetchAllTrackedItems = async (req, res) => {
   } else {
     try {
       const tokenValid = await checkToken(token);
-      const user = await User.findOne({ uniqueId: uniqueId });
+      const user = await User.findOne({ userUID: userUID });
       if (!tokenValid) {
         res.status(501).json({
           success: false,
@@ -141,13 +141,13 @@ exports.fetchAllTrackedItems = async (req, res) => {
 /**
  * Method that when called will go out and run a job to rescan for updated price on single item
  * POST
- * Params - /:token/:uniqueId/:singleItemId/:singleItemLink
+ * Params - /:token/:userUID/:singleItemId/:singleItemLink
  * Body - singleItemId, singleItemLink
  */
 exports.updateSingleItemPrice = async (req, res) => {
-  const { token, uniqueId } = req.params;
+  const { token, userUID } = req.params;
   const { singleItemId, singleItemLink } = req.body;
-  if (!uniqueId || !token || !singleItemId || !singleItemLink) {
+  if (!userUID || !token || !singleItemId || !singleItemLink) {
     res.status(400).json({
       success: false,
       message: 'Please provide all data required.',
@@ -188,11 +188,11 @@ exports.updateSingleItemPrice = async (req, res) => {
 /**
  * Method that change the tracking of an item
  * PUT
- * Params - /:token/:uniqueId/:itemUniqueId
+ * Params - /:token/:userUID/:itemUniqueId
  */
 exports.changeItemTracking = async (req, res) => {
-  const { token, uniqueId, itemUniqueId, trackStatus } = req.params;
-  if (!uniqueId || !token || !itemUniqueId || !trackStatus) {
+  const { token, userUID, itemUniqueId, trackStatus } = req.params;
+  if (!userUID || !token || !itemUniqueId || !trackStatus) {
     res.status(400).json({
       success: false,
       message: 'Please provide all data required.',
@@ -208,7 +208,7 @@ exports.changeItemTracking = async (req, res) => {
           data: null,
         });
       } else {
-        const updated = await ChangeItemTracking(itemUniqueId, trackStatus);
+        const updated = await ChangeItemTracking(itemuserUID, trackStatus);
         res.status(200).json({
           success: true,
           message: 'Item tracking updated successfully.',
@@ -228,11 +228,11 @@ exports.changeItemTracking = async (req, res) => {
 /**
  * Method that when called will remove an item from the tracking on a user
  * GET
- * Params - /:token/:uniqueId/:itemUniqueId
+ * Params - /:token/:userUID/:itemUniqueId
  */
 exports.deleteSingleItem = async (req, res) => {
-  const { token, uniqueId, itemUniqueId } = req.params;
-  if (!uniqueId || !token || !itemUniqueId) {
+  const { token, userUID, itemUniqueId } = req.params;
+  if (!userUID || !token || !itemUniqueId) {
     res.status(400).json({
       success: false,
       message: 'Please provide all data required.',
@@ -248,7 +248,7 @@ exports.deleteSingleItem = async (req, res) => {
           data: null,
         });
       } else {
-        const deleted = await DeleteItemTracking(uniqueId, itemUniqueId);
+        const deleted = await DeleteItemTracking(userUID, itemuserUID);
         res.status(200).json({
           success: true,
           message: 'Item deleted successfully.',
