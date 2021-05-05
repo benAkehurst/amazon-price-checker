@@ -13,12 +13,12 @@ const {
   AddNewItemIdToUser,
   UpdateSingleItemCurrentPrice,
   UpdateSingleItemPastPrices,
-} = require('../data/scraper.data');
+} = require('../DB/scraper.db');
 const {
   FetchAllTrackedItems,
   ChangeItemTracking,
   DeleteItemTracking,
-} = require('../data/items.data');
+} = require('../DB/items.db');
 
 /**
  * Method to do an initial scrape of item data and save to user
