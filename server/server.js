@@ -74,6 +74,6 @@ app.use((req, res) => {
 });
 
 // Server Port Controls
-server.listen(() =>
+server.listen(process.env.PORT, () =>
   console.log(`API running on localhost:${process.env.PORT}`)
 );
