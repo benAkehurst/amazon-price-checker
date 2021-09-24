@@ -16,32 +16,22 @@ const Code = require('./api/models/code.model');
 // Init Express
 const app = express();
 require('dotenv').config();
+const server = http.createServer(app);
 
 // DB Connection
-mongoose.Promise = global.Promise;
-let dev = process.env.DEV;
-mongoose.connect(
-  dev
-    ? `mongodb://${process.env.LOCAL_DB}`
-    : `mongodb://${process.env.PROD_DB}`,
-  {
-    useNewUrlParser: true,
-    useFindAndModify: false,
-    useCreateIndex: true,
-    useUnifiedTopology: true,
-  },
-  (e) => {
-    if (e) {
-      const dbError = {
-        error: e,
-        msg: 'Error Connecting to Database. Please check MongoDB is running',
-      };
-      console.log(dbError);
-    } else {
-      console.log(`Connected to ${dev ? 'Development' : 'Prod'} Database`);
+mongoose
+  .connect(
+    process.env.IS_DEV ? process.env.DB_HOST : process.env.DB_HOST_PROD,
+    () => {
+      console.log(
+        `Connected to ${process.env.IS_DEV ? 'Development' : 'Prod'} Database`
+      );
     }
-  }
-);
+  )
+  .catch((err) => {
+    console.log(err);
+    winston.error(err);
+  });
 
 // Server Config
 app.use(express.json());
@@ -52,6 +42,7 @@ app.use(
 );
 app.use(morgan('combined', { stream: winston.stream }));
 app.use(helmet());
+app.set('port', process.env.PORT);
 
 // Cors Config
 app.use((req, res, next) => {
@@ -83,7 +74,6 @@ app.use((req, res) => {
 });
 
 // Server Port Controls
-const port = process.env.PORT || '3000';
-app.set('port', port);
-const server = http.createServer(app);
-server.listen(port, () => console.log(`API running on localhost:${port}`));
+server.listen(() =>
+  console.log(`API running on localhost:${process.env.PORT}`)
+);
