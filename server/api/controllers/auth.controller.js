@@ -15,6 +15,7 @@ const Code = require('../models/code.model');
 const { OAuth2Client } = require('google-auth-library');
 const { async } = require('crypto-random-string');
 const client = new OAuth2Client(process.env.CLIENT_ID);
+const { FetchAllTrackedItems } = require('../DB/items.db');
 
 /**
  * Logs a user in
@@ -35,43 +36,40 @@ exports.login_user = async (req, res) => {
     });
   } else {
     try {
-      const user = await User.findOne({ email: sanitize(email) });
+      const user = await User.findOne({
+        email: sanitize(email.trim().toLowerCase()),
+      });
       if (!user) {
         res.status(400).json({
           success: false,
           message: 'The provided email is not registered.',
           data: err,
         });
-      } else {
-        const pwCheckSuccess = await bcrypt.compare(password, user.password);
-        if (!pwCheckSuccess) {
-          res.status(400).json({
-            success: false,
-            message: 'Email and password do not match.',
-            data: err,
-          });
-        } else {
-          let token = jwt.sign(
-            { username: user.userUID },
-            process.env.JWT_SECRET,
-            {
-              // TODO: SET JWT TOKEN DURATION HERE
-              expiresIn: rememberMe ? '48h' : '1h',
-            }
-          );
-          let userFiltered = _.pick(user.toObject(), [
-            'firstName',
-            'userUID',
-            'trackedItems',
-          ]);
-          userFiltered.token = token;
-          res.status(200).json({
-            success: true,
-            message: 'Successfully logged in',
-            data: userFiltered,
-          });
-        }
       }
+      const valid = await bcrypt.compare(password, user.password);
+      if (!valid) {
+        res.status(400).json({
+          success: false,
+          message: 'Email and password do not match.',
+          data: err,
+        });
+      }
+      let token = jwt.sign({ id: user.userUID }, process.env.JWT_SECRET);
+      if (user.trackedItems) {
+        const trackedItems = await FetchAllTrackedItems(user.trackedItems);
+        user.trackedItems = trackedItems;
+      }
+      let userFiltered = _.pick(user.toObject(), [
+        'firstName',
+        'userUID',
+        'trackedItems',
+      ]);
+      userFiltered.token = token;
+      res.status(200).json({
+        success: true,
+        message: 'Successfully logged in',
+        data: userFiltered,
+      });
     } catch {
       res.status(500).json({
         success: false,
@@ -97,14 +95,8 @@ exports.login_user = async (req, res) => {
  * }
  */
 exports.create_new_user = async (req, res) => {
-  const {
-    firstName,
-    lastName,
-    email,
-    password,
-    password2,
-    acceptedTerms,
-  } = req.body;
+  const { firstName, lastName, email, password, password2, acceptedTerms } =
+    req.body;
   const emailCheck = await checkEmailExists(email);
   if (req.body.constructor === Object && Object.keys(req.body).length === 0) {
     res.status(400).json({
