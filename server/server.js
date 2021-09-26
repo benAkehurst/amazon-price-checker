@@ -2,50 +2,49 @@
 const express = require('express');
 const http = require('http');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
 const cors = require('cors');
-require('dotenv').config();
+const morgan = require('morgan');
+const winston = require('./config/winston');
+const helmet = require('helmet');
 
 // Models Imports
-const User = require('./api/models/userModel');
-const SingleItem = require('./api/models/singleItemModel');
-const Items = require('./api/models/itemsModel');
-const Deleted = require('./api/models/deletedModel');
+const User = require('./api/models/user.model');
+const SingleItem = require('./api/models/singleItem.model');
+const Access = require('./api/models/access.model');
+const Code = require('./api/models/code.model');
 
 // Init Express
 const app = express();
+require('dotenv').config();
+const server = http.createServer(app);
 
 // DB Connection
-const dbName = 'amazon_products_db';
-mongoose.Promise = global.Promise;
-mongoose.set('useCreateIndex', true);
-mongoose.connect(
-  /**
-   * TODO: CHANGE THE DB LOCATION LOCALLY TO YOUR DB NAME OF CHOICE
-   * OR IN .env CONNECT DB TO REMOTE ADDRESS
-   */
-  `mongodb://localhost:27017/${dbName}`,
-  {
-    useNewUrlParser: true
-  },
-  e => {
-    if (e) {
-      const dbError = {
-        error: e,
-        msg: 'Error Connecting to Database. Please check MongoDB is running'
-      };
-      console.log(dbError);
-    } else {
-      console.log(`Connected to Database: ${dbName} - dev databse`);
+mongoose
+  .connect(
+    process.env.IS_DEV ? process.env.DB_HOST : process.env.DB_HOST_PROD,
+    () => {
+      console.log(
+        `Connected to ${process.env.IS_DEV ? 'Development' : 'Prod'} Database`
+      );
     }
-  }
-);
+  )
+  .catch((err) => {
+    console.log(err);
+    winston.error(err);
+  });
 
 // Server Config
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(express.json());
+app.use(
+  express.urlencoded({
+    extended: true,
+  })
+);
+app.use(morgan('combined', { stream: winston.stream }));
+app.use(helmet());
+app.set('port', process.env.PORT);
 
-// Cors Controls
+// Cors Config
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader(
@@ -61,20 +60,20 @@ app.use((req, res, next) => {
 app.use(cors());
 
 // Routes Definitions
-const userRoutes = require('./api/routes/userRoutes');
-const authRoutes = require('./api/routes/authRoutes');
-const scraperRoutes = require('./api/routes/scraperRoutes');
-userRoutes(app);
+const authRoutes = require('./api/routes/auth.routes');
+const scraperRoutes = require('./api/routes/scraper.routes');
+const userRoutes = require('./api/routes/user.routes');
 authRoutes(app);
 scraperRoutes(app);
+userRoutes(app);
 
 // 404 Handling
 app.use((req, res) => {
+  winston.error(`'Hit 404' - ${req.originalUrl} - ${req.method} - ${req.ip}`);
   res.status(404).send({ url: req.originalUrl + ' not found' });
 });
 
 // Server Port Controls
-const port = process.env.PORT || 3000;
-app.set('port', port);
-const server = http.createServer(app);
-server.listen(port, () => console.log(`API running on localhost:${port}, time: ${new Date()}`));
+server.listen(process.env.PORT, () =>
+  console.log(`API running on localhost:${process.env.PORT}`)
+);
