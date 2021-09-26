@@ -169,7 +169,8 @@ exports.create_new_user = async (req, res) => {
       });
       await newCode.save();
       const data = {
-        from: `YOUR NAME <${process.env.EMAIL_USERNAME}>`,
+        source: 'signup',
+        from: `<Site Name & Email Address><${process.env.EMAIL_USERNAME}>`,
         to: user.email,
         subject: 'Your Activation Link for YOUR APP',
         text: `Please use the following link within the next 10 minutes to activate your account on YOUR APP: ${baseUrl}/api/auth/verification/verify-account/${user.userUID}/${secretCode}`,
@@ -178,11 +179,7 @@ exports.create_new_user = async (req, res) => {
       await sendEmail(data);
       const token = jwt.sign(
         { username: user.userUID },
-        process.env.JWT_SECRET,
-        {
-          // TODO: SET JWT TOKEN DURATION HERE
-          expiresIn: '48h',
-        }
+        process.env.JWT_SECRET
       );
       let userFiltered = _.pick(user.toObject(), ['userUID', 'isAdmin']);
       userFiltered.token = token;
