@@ -16,7 +16,7 @@ const { OAuth2Client } = require('google-auth-library');
 const { async } = require('crypto-random-string');
 const client = new OAuth2Client(process.env.CLIENT_ID);
 const { FetchAllTrackedItems } = require('../DB/items.db');
-const { ValidateCode } = require('../DB/auth.db');
+const { ValidateCode, UpdatePassword } = require('../DB/auth.db');
 
 /**
  * Logs a user in
@@ -336,15 +336,12 @@ exports.verify_new_user_password = async (req, res) => {
         });
       } else {
         const newHashedPw = await bcrypt.hashSync(password, 10);
-        await User.updateOne(
-          { email: sanitize(email) },
-          { $set: { password: newHashedPw } }
-        );
-        await Code.deleteOne({ email, code });
-        res.status(200).json({
-          success: true,
-          message: 'Password reset successfully',
-          data: null,
+        await UpdatePassword(email, newHashedPw, code).then(() => {
+          res.status(200).json({
+            success: true,
+            message: 'Password reset successfully',
+            data: null,
+          });
         });
       }
     } catch (err) {

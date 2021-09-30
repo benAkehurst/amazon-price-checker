@@ -10,6 +10,13 @@ const ValidateCode = async (email) => {
   return true;
 };
 
+const UpdatePassword = async (email, password, code) => {
+  await User.updateOne({ email: email }, { $set: { password: password } });
+  await Code.deleteOne({ code: code });
+  return true;
+};
+
 module.exports = {
   ValidateCode,
+  UpdatePassword,
 };
