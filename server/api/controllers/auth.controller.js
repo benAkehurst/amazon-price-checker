@@ -5,6 +5,8 @@ const cryptoRandomString = require('crypto-random-string');
 const { format } = require('date-fns');
 const { v4: uuidv4 } = require('uuid');
 const sanitize = require('mongo-sanitize');
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client(process.env.CLIENT_ID);
 const {
   checkEmailExists,
   validateEmail,
@@ -12,9 +14,6 @@ const {
 const { sendEmail } = require('../../middlewares/services/emailService');
 const User = require('../models/user.model');
 const Code = require('../models/code.model');
-const { OAuth2Client } = require('google-auth-library');
-const { async } = require('crypto-random-string');
-const client = new OAuth2Client(process.env.CLIENT_ID);
 const { FetchAllTrackedItems } = require('../DB/items.db');
 const { ValidateCode, UpdatePassword } = require('../DB/auth.db');
 
@@ -382,7 +381,6 @@ exports.delete_user_account = async (req, res) => {
         });
       } else {
         const pwCheckSuccess = await bcrypt.compare(password, user.password);
-
         if (!pwCheckSuccess) {
           res.status(400).json({
             success: false,
@@ -393,7 +391,6 @@ exports.delete_user_account = async (req, res) => {
           const deleted = await User.deleteOne({
             email: user.email,
           });
-
           if (!deleted) {
             res.status(400).json({
               success: false,

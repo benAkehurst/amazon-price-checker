@@ -16,7 +16,7 @@ module.exports = (app) => {
     .post(authController.verify_new_user_password);
   app
     .route('/api/v2/auth/delete-account')
-    .post(authController.delete_user_account);
+    .delete(authController.delete_user_account);
   app
     .route('/api/v2/auth/check-token-valid-external/:token')
     .get(authController.check_token_valid_external);
