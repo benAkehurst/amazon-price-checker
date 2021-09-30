@@ -5,6 +5,8 @@ const cryptoRandomString = require('crypto-random-string');
 const { format } = require('date-fns');
 const { v4: uuidv4 } = require('uuid');
 const sanitize = require('mongo-sanitize');
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client(process.env.CLIENT_ID);
 const {
   checkEmailExists,
   validateEmail,
@@ -12,10 +14,8 @@ const {
 const { sendEmail } = require('../../middlewares/services/emailService');
 const User = require('../models/user.model');
 const Code = require('../models/code.model');
-const { OAuth2Client } = require('google-auth-library');
-const { async } = require('crypto-random-string');
-const client = new OAuth2Client(process.env.CLIENT_ID);
 const { FetchAllTrackedItems } = require('../DB/items.db');
+const { ValidateCode, UpdatePassword } = require('../DB/auth.db');
 
 /**
  * Logs a user in
@@ -169,20 +169,16 @@ exports.create_new_user = async (req, res) => {
       });
       await newCode.save();
       const data = {
-        from: `YOUR NAME <${process.env.EMAIL_USERNAME}>`,
+        source: 'signup',
+        from: `<Site Name & Email Address><${process.env.EMAIL_USERNAME}>`,
         to: user.email,
-        subject: 'Your Activation Link for YOUR APP',
-        text: `Please use the following link within the next 10 minutes to activate your account on YOUR APP: ${baseUrl}/api/auth/verification/verify-account/${user.userUID}/${secretCode}`,
-        html: `<p>Please use the following link within the next 10 minutes to activate your account on YOUR APP: <strong><a href="${baseUrl}/api/v2/auth/verification/verify-account/${user.userUID}/${secretCode}" target="_blank">Email Verification Link</a></strong></p>`,
+        subject: `Your Activation Link for ${process.env.APP_NAME}`,
+        html: `<p>Please use the following link within the next 10 minutes to activate your account on ${process.env.APP_NAME}: <strong><a href="${baseUrl}/api/v2/auth/verification/verify-account/${user.userUID}/${secretCode}" target="_blank">Email Verification Link</a></strong></p>`,
       };
       await sendEmail(data);
       const token = jwt.sign(
         { username: user.userUID },
-        process.env.JWT_SECRET,
-        {
-          // TODO: SET JWT TOKEN DURATION HERE
-          expiresIn: '48h',
-        }
+        process.env.JWT_SECRET
       );
       let userFiltered = _.pick(user.toObject(), ['userUID', 'isAdmin']);
       userFiltered.token = token;
@@ -215,24 +211,16 @@ exports.validate_user_email_and_account = async (req, res) => {
       email: user.email,
       code: sanitize(req.params.secretCode),
     });
-
     if (!user) {
       res.sendStatus(401);
     } else {
-      await User.updateOne(
-        { email: user.email },
-        { $set: { userStatus: 'active', userActive: true } }
-      );
-      await Code.deleteMany({ email: user.email });
-
+      await ValidateCode(user.email);
       let redirectPath;
-
       if (process.env.NODE_ENV == 'production') {
         redirectPath = `${req.protocol}://${req.get('host')}account/verified`;
       } else {
         redirectPath = `http://127.0.0.1:8080/account/verified`;
       }
-
       res.redirect(redirectPath);
     }
   } catch (err) {
@@ -260,7 +248,6 @@ exports.get_reset_password_code = async (req, res) => {
   } else {
     try {
       const user = await User.findOne({ email: sanitize(email) });
-
       if (!user) {
         res.status(400).json({
           success: false,
@@ -277,11 +264,11 @@ exports.get_reset_password_code = async (req, res) => {
         });
         await newCode.save();
         const data = {
-          from: `YOUR NAME <${process.env.EMAIL_USERNAME}>`,
+          source: 'resetPassword',
+          from: `<Site Name & Email Address><${process.env.EMAIL_USERNAME}>`,
           to: email,
-          subject: 'Your Password Reset Code for YOUR APP',
-          text: `Please use the following code within the next 10 minutes to reset your password on YOUR APP: ${secretCode}`,
-          html: `<p>Please use the following code within the next 10 minutes to reset your password on YOUR APP: <strong>${secretCode}</strong></p>`,
+          subject: `Your Password Reset Code for ${process.env.APP_NAME}`,
+          html: `<p>Please use the following code within the next 10 minutes to reset your password on ${process.env.APP_NAME}: <strong>${secretCode}</strong></p>`,
         };
         await sendEmail(data);
         res.status(201).json({
@@ -348,15 +335,12 @@ exports.verify_new_user_password = async (req, res) => {
         });
       } else {
         const newHashedPw = await bcrypt.hashSync(password, 10);
-        await User.updateOne(
-          { email: sanitize(email) },
-          { $set: { password: newHashedPw } }
-        );
-        await Code.deleteOne({ email, code });
-        res.status(200).json({
-          success: true,
-          message: 'Password reset successfully',
-          data: null,
+        await UpdatePassword(email, newHashedPw, code).then(() => {
+          res.status(200).json({
+            success: true,
+            message: 'Password reset successfully',
+            data: null,
+          });
         });
       }
     } catch (err) {
@@ -397,7 +381,6 @@ exports.delete_user_account = async (req, res) => {
         });
       } else {
         const pwCheckSuccess = await bcrypt.compare(password, user.password);
-
         if (!pwCheckSuccess) {
           res.status(400).json({
             success: false,
@@ -408,7 +391,6 @@ exports.delete_user_account = async (req, res) => {
           const deleted = await User.deleteOne({
             email: user.email,
           });
-
           if (!deleted) {
             res.status(400).json({
               success: false,
