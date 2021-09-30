@@ -173,9 +173,8 @@ exports.create_new_user = async (req, res) => {
         source: 'signup',
         from: `<Site Name & Email Address><${process.env.EMAIL_USERNAME}>`,
         to: user.email,
-        subject: 'Your Activation Link for YOUR APP',
-        text: `Please use the following link within the next 10 minutes to activate your account on YOUR APP: ${baseUrl}/api/auth/verification/verify-account/${user.userUID}/${secretCode}`,
-        html: `<p>Please use the following link within the next 10 minutes to activate your account on YOUR APP: <strong><a href="${baseUrl}/api/v2/auth/verification/verify-account/${user.userUID}/${secretCode}" target="_blank">Email Verification Link</a></strong></p>`,
+        subject: `Your Activation Link for ${process.env.APP_NAME}`,
+        html: `<p>Please use the following link within the next 10 minutes to activate your account on ${process.env.APP_NAME}: <strong><a href="${baseUrl}/api/v2/auth/verification/verify-account/${user.userUID}/${secretCode}" target="_blank">Email Verification Link</a></strong></p>`,
       };
       await sendEmail(data);
       const token = jwt.sign(
@@ -269,8 +268,8 @@ exports.get_reset_password_code = async (req, res) => {
           source: 'resetPassword',
           from: `<Site Name & Email Address><${process.env.EMAIL_USERNAME}>`,
           to: email,
-          subject: 'Your Password Reset Code for YOUR APP',
-          html: `<p>Please use the following code within the next 10 minutes to reset your password on YOUR APP: <strong>${secretCode}</strong></p>`,
+          subject: `Your Password Reset Code for ${process.env.APP_NAME}`,
+          html: `<p>Please use the following code within the next 10 minutes to reset your password on ${process.env.APP_NAME}: <strong>${secretCode}</strong></p>`,
         };
         await sendEmail(data);
         res.status(201).json({
