@@ -16,6 +16,7 @@ const { OAuth2Client } = require('google-auth-library');
 const { async } = require('crypto-random-string');
 const client = new OAuth2Client(process.env.CLIENT_ID);
 const { FetchAllTrackedItems } = require('../DB/items.db');
+const { ValidateCode } = require('../DB/auth.db');
 
 /**
  * Logs a user in
@@ -212,24 +213,16 @@ exports.validate_user_email_and_account = async (req, res) => {
       email: user.email,
       code: sanitize(req.params.secretCode),
     });
-
     if (!user) {
       res.sendStatus(401);
     } else {
-      await User.updateOne(
-        { email: user.email },
-        { $set: { userStatus: 'active', userActive: true } }
-      );
-      await Code.deleteMany({ email: user.email });
-
+      await ValidateCode(user.email);
       let redirectPath;
-
       if (process.env.NODE_ENV == 'production') {
         redirectPath = `${req.protocol}://${req.get('host')}account/verified`;
       } else {
         redirectPath = `http://127.0.0.1:8080/account/verified`;
       }
-
       res.redirect(redirectPath);
     }
   } catch (err) {
