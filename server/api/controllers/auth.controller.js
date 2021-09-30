@@ -250,7 +250,6 @@ exports.get_reset_password_code = async (req, res) => {
   } else {
     try {
       const user = await User.findOne({ email: sanitize(email) });
-
       if (!user) {
         res.status(400).json({
           success: false,
@@ -267,10 +266,10 @@ exports.get_reset_password_code = async (req, res) => {
         });
         await newCode.save();
         const data = {
-          from: `YOUR NAME <${process.env.EMAIL_USERNAME}>`,
+          source: 'resetPassword',
+          from: `<Site Name & Email Address><${process.env.EMAIL_USERNAME}>`,
           to: email,
           subject: 'Your Password Reset Code for YOUR APP',
-          text: `Please use the following code within the next 10 minutes to reset your password on YOUR APP: ${secretCode}`,
           html: `<p>Please use the following code within the next 10 minutes to reset your password on YOUR APP: <strong>${secretCode}</strong></p>`,
         };
         await sendEmail(data);

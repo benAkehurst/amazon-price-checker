@@ -40,6 +40,14 @@ const sendEmail = (data) => {
         html: `<p>The ${data.itemName} you wanted to buy is now at your target price! <a href="${data.itemLink}">Buy it HERE!</a></p>`,
       };
       break;
+    case 'resetPassword':
+      mailOptions = {
+        from: data.from,
+        to: data.to,
+        subject: data.subject,
+        html: data.html,
+      };
+      break;
   }
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
