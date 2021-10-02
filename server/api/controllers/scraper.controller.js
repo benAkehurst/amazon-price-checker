@@ -1,4 +1,4 @@
-'use strict';
+const jwt = require('jsonwebtoken');
 const User = require('../models/user.model');
 const SingleItem = require('../models/singleItem.model');
 const {
@@ -19,6 +19,7 @@ const {
   ChangeItemTracking,
   DeleteItemTracking,
 } = require('../DB/items.db');
+const { sendEmail } = require('../../middlewares/services/emailService');
 
 /**
  * Method to do an initial scrape of item data and save to user
@@ -48,7 +49,6 @@ exports.createInitialItem = async (req, res) => {
     });
   } else {
     try {
-      const tokenValid = await checkToken(token);
       const scrapedItem = await fetchInitialItemInfo(itemUrl);
       const newSingleItem = new SingleItem({
         name: scrapedItem.title,
@@ -65,7 +65,7 @@ exports.createInitialItem = async (req, res) => {
           message: 'Scrape of item failed',
           data: null,
         });
-      } else if (!tokenValid.success) {
+      } else if (!jwt.verify(token, process.env.JWT_SECRET)) {
         res.status(501).json({
           success: false,
           message: 'Token not valid.',
@@ -74,11 +74,21 @@ exports.createInitialItem = async (req, res) => {
       } else {
         const newSingleItemSaved = await newSingleItem.save();
         const user = await AddNewItemIdToUser(userUID, newSingleItemSaved._id);
+        const trackedItems = await FetchAllTrackedItems(user.trackedItems);
         res.status(201).json({
           success: true,
           message: 'Item tracked and saved successfully.',
-          data: user.trackedItems,
+          data: trackedItems,
         });
+        if (targetPrice <= scrapedItem.priceConverted) {
+          const data = {
+            from: `<Site Name & Email Address><${process.env.EMAIL_USERNAME}>`,
+            to: user.email,
+            subject: `Your Price for ${newSingleItem.name} matches your target price`,
+            html: `<p>Please use the link to purchase ${newSingleItem.name}: <strong><a href="${itemUrl}" target="_blank">Click here to buy!</a></strong></p>`,
+          };
+          sendEmail(data);
+        }
       }
     } catch {
       res.status(500).json({
