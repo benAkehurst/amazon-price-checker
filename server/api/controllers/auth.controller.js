@@ -169,7 +169,6 @@ exports.create_new_user = async (req, res) => {
       });
       await newCode.save();
       const data = {
-        source: 'signup',
         from: `<Site Name & Email Address><${process.env.EMAIL_USERNAME}>`,
         to: user.email,
         subject: `Your Activation Link for ${process.env.APP_NAME}`,
@@ -264,7 +263,6 @@ exports.get_reset_password_code = async (req, res) => {
         });
         await newCode.save();
         const data = {
-          source: 'resetPassword',
           from: `<Site Name & Email Address><${process.env.EMAIL_USERNAME}>`,
           to: email,
           subject: `Your Password Reset Code for ${process.env.APP_NAME}`,
