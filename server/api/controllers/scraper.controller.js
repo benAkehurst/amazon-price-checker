@@ -115,9 +115,8 @@ exports.fetchAllTrackedItems = async (req, res) => {
     });
   } else {
     try {
-      const tokenValid = await checkToken(token);
       const user = await User.findOne({ userUID: userUID });
-      if (!tokenValid) {
+      if (!jwt.verify(token, process.env.JWT_SECRET)) {
         res.status(501).json({
           success: false,
           message: 'Token not valid.',
@@ -131,11 +130,11 @@ exports.fetchAllTrackedItems = async (req, res) => {
         });
       } else {
         let itemsIds = user.trackedItems;
-        let allItems = await FetchAllTrackedItems(itemsIds);
+        let allTrackedItems = await FetchAllTrackedItems(itemsIds);
         res.status(200).json({
           success: true,
           message: 'Got user items',
-          data: allItems,
+          data: allTrackedItems,
         });
       }
     } catch {
