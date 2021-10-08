@@ -148,9 +148,9 @@ exports.fetchAllTrackedItems = async (req, res) => {
 };
 
 /**
- * Method that when called will go out and run a job to rescan for updated price on single item
+ * Method that when called will go out and run a job to re-scan for updated price on single item
  * POST
- * Params - /:token/:userUID/:singleItemId/:singleItemLink
+ * Params - /:token/:userUID
  * Body - singleItemId, singleItemLink
  */
 exports.updateSingleItemPrice = async (req, res) => {
@@ -164,16 +164,26 @@ exports.updateSingleItemPrice = async (req, res) => {
     });
   } else {
     try {
-      const tokenValid = await checkToken(token);
-      if (!tokenValid.success) {
+      if (!jwt.verify(token, process.env.JWT_SECRET)) {
         res.status(501).json({
           success: false,
           message: 'Token not valid.',
           data: null,
         });
       } else {
+        const item = await SingleItem.findOne({ _id: singleItemId });
+        const user = await User.findOne({ userUID: userUID });
         await UpdateSingleItemPastPrices(singleItemId);
         const currentItemPrice = await fetchCurrentItemPrice(singleItemLink);
+        if (currentItemPrice.priceConverted <= item.currentPrice) {
+          const data = {
+            from: `<Site Name & Email Address><${process.env.EMAIL_USERNAME}>`,
+            to: user.email,
+            subject: `Your Price for ${item.name} matches your target price`,
+            html: `<p>Please use the link to purchase ${item.name}: <strong><a href="${item.link}" target="_blank">Click here to buy!</a></strong></p>`,
+          };
+          sendEmail(data);
+        }
         const currentItemPriceDBWrite = await UpdateSingleItemCurrentPrice(
           singleItemId,
           currentItemPrice
