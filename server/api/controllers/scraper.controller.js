@@ -1,4 +1,4 @@
-'use strict';
+const jwt = require('jsonwebtoken');
 const User = require('../models/user.model');
 const SingleItem = require('../models/singleItem.model');
 const {
@@ -17,8 +17,9 @@ const {
 const {
   FetchAllTrackedItems,
   ChangeItemTracking,
-  DeleteItemTracking,
+  DeleteItem,
 } = require('../DB/items.db');
+const { sendEmail } = require('../../middlewares/services/emailService');
 
 /**
  * Method to do an initial scrape of item data and save to user
@@ -48,7 +49,6 @@ exports.createInitialItem = async (req, res) => {
     });
   } else {
     try {
-      const tokenValid = await checkToken(token);
       const scrapedItem = await fetchInitialItemInfo(itemUrl);
       const newSingleItem = new SingleItem({
         name: scrapedItem.title,
@@ -65,7 +65,7 @@ exports.createInitialItem = async (req, res) => {
           message: 'Scrape of item failed',
           data: null,
         });
-      } else if (!tokenValid.success) {
+      } else if (!jwt.verify(token, process.env.JWT_SECRET)) {
         res.status(501).json({
           success: false,
           message: 'Token not valid.',
@@ -74,11 +74,21 @@ exports.createInitialItem = async (req, res) => {
       } else {
         const newSingleItemSaved = await newSingleItem.save();
         const user = await AddNewItemIdToUser(userUID, newSingleItemSaved._id);
+        const trackedItems = await FetchAllTrackedItems(user.trackedItems);
         res.status(201).json({
           success: true,
           message: 'Item tracked and saved successfully.',
-          data: user.trackedItems,
+          data: trackedItems,
         });
+        if (targetPrice <= scrapedItem.priceConverted) {
+          const data = {
+            from: `<Site Name & Email Address><${process.env.EMAIL_USERNAME}>`,
+            to: user.email,
+            subject: `Your Price for ${newSingleItem.name} matches your target price`,
+            html: `<p>Please use the link to purchase ${newSingleItem.name}: <strong><a href="${itemUrl}" target="_blank">Click here to buy!</a></strong></p>`,
+          };
+          sendEmail(data);
+        }
       }
     } catch {
       res.status(500).json({
@@ -105,9 +115,8 @@ exports.fetchAllTrackedItems = async (req, res) => {
     });
   } else {
     try {
-      const tokenValid = await checkToken(token);
       const user = await User.findOne({ userUID: userUID });
-      if (!tokenValid) {
+      if (!jwt.verify(token, process.env.JWT_SECRET)) {
         res.status(501).json({
           success: false,
           message: 'Token not valid.',
@@ -121,11 +130,11 @@ exports.fetchAllTrackedItems = async (req, res) => {
         });
       } else {
         let itemsIds = user.trackedItems;
-        let allItems = await FetchAllTrackedItems(itemsIds);
+        let allTrackedItems = await FetchAllTrackedItems(itemsIds);
         res.status(200).json({
           success: true,
           message: 'Got user items',
-          data: allItems,
+          data: allTrackedItems,
         });
       }
     } catch {
@@ -139,9 +148,9 @@ exports.fetchAllTrackedItems = async (req, res) => {
 };
 
 /**
- * Method that when called will go out and run a job to rescan for updated price on single item
+ * Method that when called will go out and run a job to re-scan for updated price on single item
  * POST
- * Params - /:token/:userUID/:singleItemId/:singleItemLink
+ * Params - /:token/:userUID
  * Body - singleItemId, singleItemLink
  */
 exports.updateSingleItemPrice = async (req, res) => {
@@ -155,16 +164,26 @@ exports.updateSingleItemPrice = async (req, res) => {
     });
   } else {
     try {
-      const tokenValid = await checkToken(token);
-      if (!tokenValid.success) {
+      if (!jwt.verify(token, process.env.JWT_SECRET)) {
         res.status(501).json({
           success: false,
           message: 'Token not valid.',
           data: null,
         });
       } else {
+        const item = await SingleItem.findOne({ _id: singleItemId });
+        const user = await User.findOne({ userUID: userUID });
         await UpdateSingleItemPastPrices(singleItemId);
         const currentItemPrice = await fetchCurrentItemPrice(singleItemLink);
+        if (currentItemPrice.priceConverted <= item.currentPrice) {
+          const data = {
+            from: `<Site Name & Email Address><${process.env.EMAIL_USERNAME}>`,
+            to: user.email,
+            subject: `Your Price for ${item.name} matches your target price`,
+            html: `<p>Please use the link to purchase ${item.name}: <strong><a href="${item.link}" target="_blank">Click here to buy!</a></strong></p>`,
+          };
+          sendEmail(data);
+        }
         const currentItemPriceDBWrite = await UpdateSingleItemCurrentPrice(
           singleItemId,
           currentItemPrice
@@ -188,7 +207,7 @@ exports.updateSingleItemPrice = async (req, res) => {
 /**
  * Method that change the tracking of an item
  * PUT
- * Params - /:token/:userUID/:itemUniqueId
+ * Params - /:token/:userUID/:itemUniqueId/:trackStatus
  */
 exports.changeItemTracking = async (req, res) => {
   const { token, userUID, itemUniqueId, trackStatus } = req.params;
@@ -200,15 +219,15 @@ exports.changeItemTracking = async (req, res) => {
     });
   } else {
     try {
-      const tokenValid = await checkToken(token);
-      if (!tokenValid.success) {
+      if (!jwt.verify(token, process.env.JWT_SECRET)) {
         res.status(501).json({
           success: false,
           message: 'Token not valid.',
           data: null,
         });
       } else {
-        const updated = await ChangeItemTracking(itemuserUID, trackStatus);
+        console.log('trackStatus: ', trackStatus);
+        const updated = await ChangeItemTracking(itemUniqueId, trackStatus);
         res.status(200).json({
           success: true,
           message: 'Item tracking updated successfully.',
@@ -218,7 +237,7 @@ exports.changeItemTracking = async (req, res) => {
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: 'Something went wrong fetching initial item details.',
+        message: 'Something went wrong changing tracking details.',
         data: error,
       });
     }
@@ -240,19 +259,17 @@ exports.deleteSingleItem = async (req, res) => {
     });
   } else {
     try {
-      const tokenValid = await checkToken(token);
-      if (!tokenValid.success) {
+      if (!jwt.verify(token, process.env.JWT_SECRET)) {
         res.status(501).json({
           success: false,
           message: 'Token not valid.',
           data: null,
         });
       } else {
-        const deleted = await DeleteItemTracking(userUID, itemuserUID);
+        await DeleteItem(userUID, itemUniqueId);
         res.status(200).json({
           success: true,
           message: 'Item deleted successfully.',
-          data: deleted,
         });
       }
     } catch (error) {

@@ -23,13 +23,18 @@ const ChangeItemTracking = async (itemId, trackStatus) => {
   return changedTracking;
 };
 
-const DeleteItemTracking = async (userUID, itemId) => {
-  const updatedItems = await SingleItem.findOneAndDelete({ _id: itemId });
-  return { updatedItems };
+const DeleteItem = async (userUID, itemId) => {
+  await SingleItem.findOneAndDelete({ _id: itemId });
+  const user = await User.findOneAndUpdate(
+    { userUID: userUID },
+    { $pull: { trackedItems: itemId } },
+    { new: true }
+  );
+  return user;
 };
 
 module.exports = {
   FetchAllTrackedItems,
   ChangeItemTracking,
-  DeleteItemTracking,
+  DeleteItem,
 };
