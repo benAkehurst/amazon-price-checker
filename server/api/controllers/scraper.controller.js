@@ -207,7 +207,7 @@ exports.updateSingleItemPrice = async (req, res) => {
 /**
  * Method that change the tracking of an item
  * PUT
- * Params - /:token/:userUID/:itemUniqueId
+ * Params - /:token/:userUID/:itemUniqueId/:trackStatus
  */
 exports.changeItemTracking = async (req, res) => {
   const { token, userUID, itemUniqueId, trackStatus } = req.params;
@@ -219,15 +219,15 @@ exports.changeItemTracking = async (req, res) => {
     });
   } else {
     try {
-      const tokenValid = await checkToken(token);
-      if (!tokenValid.success) {
+      if (!jwt.verify(token, process.env.JWT_SECRET)) {
         res.status(501).json({
           success: false,
           message: 'Token not valid.',
           data: null,
         });
       } else {
-        const updated = await ChangeItemTracking(itemuserUID, trackStatus);
+        console.log('trackStatus: ', trackStatus);
+        const updated = await ChangeItemTracking(itemUniqueId, trackStatus);
         res.status(200).json({
           success: true,
           message: 'Item tracking updated successfully.',
@@ -237,7 +237,7 @@ exports.changeItemTracking = async (req, res) => {
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: 'Something went wrong fetching initial item details.',
+        message: 'Something went wrong changing tracking details.',
         data: error,
       });
     }
