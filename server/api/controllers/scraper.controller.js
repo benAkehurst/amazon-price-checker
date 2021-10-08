@@ -17,7 +17,7 @@ const {
 const {
   FetchAllTrackedItems,
   ChangeItemTracking,
-  DeleteItemTracking,
+  DeleteItem,
 } = require('../DB/items.db');
 const { sendEmail } = require('../../middlewares/services/emailService');
 
@@ -259,19 +259,17 @@ exports.deleteSingleItem = async (req, res) => {
     });
   } else {
     try {
-      const tokenValid = await checkToken(token);
-      if (!tokenValid.success) {
+      if (!jwt.verify(token, process.env.JWT_SECRET)) {
         res.status(501).json({
           success: false,
           message: 'Token not valid.',
           data: null,
         });
       } else {
-        const deleted = await DeleteItemTracking(userUID, itemuserUID);
+        await DeleteItem(userUID, itemUniqueId);
         res.status(200).json({
           success: true,
           message: 'Item deleted successfully.',
-          data: deleted,
         });
       }
     } catch (error) {
