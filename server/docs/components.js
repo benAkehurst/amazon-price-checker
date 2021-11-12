@@ -122,6 +122,26 @@ module.exports = {
           },
         },
       },
+      loginInput: {
+        type: "object",
+        properties: {
+          email: {
+            type: "string",
+            description: "user email",
+            example: "john@doe.com",
+          },
+          password: {
+            type: "string",
+            description: "user password",
+            example: "Abc123!@",
+          },
+          rememberMe: {
+            type: "boolean",
+            description: "Defines if user is to remain logged in",
+            example: "true",
+          },
+        },
+      },
     },
   },
 };
