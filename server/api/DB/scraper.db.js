@@ -1,5 +1,5 @@
-const User = require('../models/user.model');
-const SingleItem = require('../models/singleItem.model');
+const User = require("../models/user.model");
+const SingleItem = require("../models/singleItem.model");
 
 const AddNewItemIdToUser = async (userUID, singleItemId) => {
   const user = await User.findOneAndUpdate(

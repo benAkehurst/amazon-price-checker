@@ -27,8 +27,10 @@
   },
   "dependencies": {
     "app-root-path": "^3.0.0",
+    "axios": "^0.24.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
+    "cheerio": "*",
     "cors": "^2.8.5",
     "crypto-random-string": "^3.3.0",
     "date-fns": "^2.24.0",
