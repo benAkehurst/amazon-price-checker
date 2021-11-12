@@ -2,8 +2,8 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
 const SingleItem = require("../models/singleItem.model");
 const {
+  fetchItemInfo,
   fetchCurrentItemPrice,
-  fetchItemInfoCheerio,
 } = require("../../middlewares/services/scraperService");
 const { validateAmazonUrl } = require("../../middlewares/validators");
 const {
@@ -46,13 +46,13 @@ exports.createInitialItem = async (req, res) => {
     });
   } else {
     try {
-      const scrapedItem = await fetchItemInfoCheerio(itemUrl);
+      const scrapedItem = await fetchItemInfo(itemUrl);
       const newSingleItem = new SingleItem({
         asin: scrapedItem.asin,
         name: scrapedItem.title,
         link: itemUrl,
         imgUrl: scrapedItem.imgUrl,
-        currentPrice: scrapedItem.priceConverted,
+        currentPrice: scrapedItem.price,
         targetPrice: targetPrice,
         asin: scrapedItem.asin,
         rating: scrapedItem.rating,
@@ -150,13 +150,11 @@ exports.fetchAllTrackedItems = async (req, res) => {
 /**
  * Method that when called will go out and run a job to re-scan for updated price on single item
  * POST
- * Params - /:token/:userUID
- * Body - singleItemId, singleItemLink
+ * Params - /:token/:userUID/:singleItemId
  */
 exports.updateSingleItemPrice = async (req, res) => {
-  const { token, userUID } = req.params;
-  const { singleItemId, singleItemLink } = req.body;
-  if (!userUID || !token || !singleItemId || !singleItemLink) {
+  const { token, userUID, singleItemId } = req.params;
+  if (!userUID || !token || !singleItemId) {
     res.status(400).json({
       success: false,
       message: "Please provide all data required.",
@@ -174,7 +172,9 @@ exports.updateSingleItemPrice = async (req, res) => {
         const item = await SingleItem.findOne({ _id: singleItemId });
         const user = await User.findOne({ userUID: userUID });
         await UpdateSingleItemPastPrices(singleItemId);
-        const currentItemPrice = await fetchCurrentItemPrice(singleItemLink);
+        const currentItemPrice = await fetchCurrentItemPrice(item.link);
+        await UpdateSingleItemCurrentPrice(singleItemId, currentItemPrice);
+        const updatedItem = await SingleItem.findOne({ _id: singleItemId });
         if (currentItemPrice.priceConverted <= item.currentPrice) {
           const data = {
             from: `<Site Name & Email Address><${process.env.EMAIL_USERNAME}>`,
@@ -184,14 +184,10 @@ exports.updateSingleItemPrice = async (req, res) => {
           };
           sendEmail(data);
         }
-        const currentItemPriceDBWrite = await UpdateSingleItemCurrentPrice(
-          singleItemId,
-          currentItemPrice
-        );
         res.status(200).json({
           success: true,
           message: "Item price updated successfully.",
-          data: { currentItemPriceDBWrite },
+          data: updatedItem,
         });
       }
     } catch (error) {
@@ -226,7 +222,6 @@ exports.changeItemTracking = async (req, res) => {
           data: null,
         });
       } else {
-        console.log("trackStatus: ", trackStatus);
         const updated = await ChangeItemTracking(itemUniqueId, trackStatus);
         res.status(200).json({
           success: true,
