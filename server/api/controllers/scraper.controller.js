@@ -4,8 +4,8 @@ const SingleItem = require("../models/singleItem.model");
 const {
   fetchItemInfo,
   fetchCurrentItemPrice,
-} = require("../../middlewares/services/scraperService");
-const { validateAmazonUrl } = require("../../middlewares/validators");
+} = require("../../services/scraperService");
+const { validateAmazonUrl } = require("../../services/validatorsService");
 const {
   AddNewItemIdToUser,
   UpdateSingleItemCurrentPrice,
@@ -16,7 +16,7 @@ const {
   ChangeItemTracking,
   DeleteItem,
 } = require("../DB/items.db");
-const { sendEmail } = require("../../middlewares/services/emailService");
+const { sendEmail } = require("../../services/emailService");
 
 /**
  * Method to do an initial scrape of item data and save to user
