@@ -1,5 +1,5 @@
-'use strict';
-const mongoose = require('mongoose');
+"use strict";
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const SingleItemSchema = new Schema({
@@ -18,6 +18,12 @@ const SingleItemSchema = new Schema({
   targetPrice: {
     type: Number,
   },
+  asin: {
+    type: String,
+  },
+  rating: {
+    type: String,
+  },
   following: {
     type: Boolean,
   },
@@ -34,4 +40,4 @@ const SingleItemSchema = new Schema({
   },
 });
 
-module.exports = mongoose.model('SingleItem', SingleItemSchema);
+module.exports = mongoose.model("SingleItem", SingleItemSchema);

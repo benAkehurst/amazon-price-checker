@@ -1,25 +1,22 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/user.model');
-const SingleItem = require('../models/singleItem.model');
+const jwt = require("jsonwebtoken");
+const User = require("../models/user.model");
+const SingleItem = require("../models/singleItem.model");
 const {
-  fetchInitialItemInfo,
   fetchCurrentItemPrice,
-} = require('../../middlewares/services/scraperService');
-const {
-  validateAmazonUrl,
-  checkToken,
-} = require('../../middlewares/validators');
+  fetchItemInfoCheerio,
+} = require("../../middlewares/services/scraperService");
+const { validateAmazonUrl } = require("../../middlewares/validators");
 const {
   AddNewItemIdToUser,
   UpdateSingleItemCurrentPrice,
   UpdateSingleItemPastPrices,
-} = require('../DB/scraper.db');
+} = require("../DB/scraper.db");
 const {
   FetchAllTrackedItems,
   ChangeItemTracking,
   DeleteItem,
-} = require('../DB/items.db');
-const { sendEmail } = require('../../middlewares/services/emailService');
+} = require("../DB/items.db");
+const { sendEmail } = require("../../middlewares/services/emailService");
 
 /**
  * Method to do an initial scrape of item data and save to user
@@ -38,37 +35,40 @@ exports.createInitialItem = async (req, res) => {
   if (!userUID || !token || !itemUrl || !followItem || !targetPrice) {
     res.status(400).json({
       success: false,
-      message: 'Please provide all data required.',
+      message: "Please provide all data required.",
       data: null,
     });
   } else if (!validateAmazonUrl(itemUrl)) {
     res.status(400).json({
       success: false,
-      message: 'Wrong URL format in request.',
+      message: "Wrong URL format in request.",
       data: null,
     });
   } else {
     try {
-      const scrapedItem = await fetchInitialItemInfo(itemUrl);
+      const scrapedItem = await fetchItemInfoCheerio(itemUrl);
       const newSingleItem = new SingleItem({
+        asin: scrapedItem.asin,
         name: scrapedItem.title,
         link: itemUrl,
         imgUrl: scrapedItem.imgUrl,
         currentPrice: scrapedItem.priceConverted,
         targetPrice: targetPrice,
+        asin: scrapedItem.asin,
+        rating: scrapedItem.rating,
         following: followItem,
         pastPrices: [],
       });
       if (!scrapedItem) {
         res.status(500).json({
           success: false,
-          message: 'Scrape of item failed',
+          message: "Scrape of item failed",
           data: null,
         });
       } else if (!jwt.verify(token, process.env.JWT_SECRET)) {
         res.status(501).json({
           success: false,
-          message: 'Token not valid.',
+          message: "Token not valid.",
           data: null,
         });
       } else {
@@ -77,7 +77,7 @@ exports.createInitialItem = async (req, res) => {
         const trackedItems = await FetchAllTrackedItems(user.trackedItems);
         res.status(201).json({
           success: true,
-          message: 'Item tracked and saved successfully.',
+          message: "Item tracked and saved successfully.",
           data: trackedItems,
         });
         if (targetPrice <= scrapedItem.priceConverted) {
@@ -93,7 +93,7 @@ exports.createInitialItem = async (req, res) => {
     } catch {
       res.status(500).json({
         success: false,
-        message: 'Something went wrong fetching initial item details.',
+        message: "Something went wrong fetching initial item details.",
         data: null,
       });
     }
@@ -110,7 +110,7 @@ exports.fetchAllTrackedItems = async (req, res) => {
   if (!userUID || !token) {
     res.status(400).json({
       success: false,
-      message: 'Please provide all data required.',
+      message: "Please provide all data required.",
       data: null,
     });
   } else {
@@ -119,13 +119,13 @@ exports.fetchAllTrackedItems = async (req, res) => {
       if (!jwt.verify(token, process.env.JWT_SECRET)) {
         res.status(501).json({
           success: false,
-          message: 'Token not valid.',
+          message: "Token not valid.",
           data: null,
         });
       } else if (!user) {
         res.status(501).json({
           success: false,
-          message: 'User not found.',
+          message: "User not found.",
           data: null,
         });
       } else {
@@ -133,14 +133,14 @@ exports.fetchAllTrackedItems = async (req, res) => {
         let allTrackedItems = await FetchAllTrackedItems(itemsIds);
         res.status(200).json({
           success: true,
-          message: 'Got user items',
+          message: "Got user items",
           data: allTrackedItems,
         });
       }
     } catch {
       res.status(500).json({
         success: false,
-        message: 'Something went wrong fetching initial item details.',
+        message: "Something went wrong fetching initial item details.",
         data: null,
       });
     }
@@ -159,7 +159,7 @@ exports.updateSingleItemPrice = async (req, res) => {
   if (!userUID || !token || !singleItemId || !singleItemLink) {
     res.status(400).json({
       success: false,
-      message: 'Please provide all data required.',
+      message: "Please provide all data required.",
       data: null,
     });
   } else {
@@ -167,7 +167,7 @@ exports.updateSingleItemPrice = async (req, res) => {
       if (!jwt.verify(token, process.env.JWT_SECRET)) {
         res.status(501).json({
           success: false,
-          message: 'Token not valid.',
+          message: "Token not valid.",
           data: null,
         });
       } else {
@@ -190,14 +190,14 @@ exports.updateSingleItemPrice = async (req, res) => {
         );
         res.status(200).json({
           success: true,
-          message: 'Item price updated successfully.',
+          message: "Item price updated successfully.",
           data: { currentItemPriceDBWrite },
         });
       }
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: 'Something went wrong fetching initial item details.',
+        message: "Something went wrong fetching initial item details.",
         data: error,
       });
     }
@@ -214,7 +214,7 @@ exports.changeItemTracking = async (req, res) => {
   if (!userUID || !token || !itemUniqueId || !trackStatus) {
     res.status(400).json({
       success: false,
-      message: 'Please provide all data required.',
+      message: "Please provide all data required.",
       data: null,
     });
   } else {
@@ -222,22 +222,22 @@ exports.changeItemTracking = async (req, res) => {
       if (!jwt.verify(token, process.env.JWT_SECRET)) {
         res.status(501).json({
           success: false,
-          message: 'Token not valid.',
+          message: "Token not valid.",
           data: null,
         });
       } else {
-        console.log('trackStatus: ', trackStatus);
+        console.log("trackStatus: ", trackStatus);
         const updated = await ChangeItemTracking(itemUniqueId, trackStatus);
         res.status(200).json({
           success: true,
-          message: 'Item tracking updated successfully.',
+          message: "Item tracking updated successfully.",
           data: updated.following,
         });
       }
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: 'Something went wrong changing tracking details.',
+        message: "Something went wrong changing tracking details.",
         data: error,
       });
     }
@@ -254,7 +254,7 @@ exports.deleteSingleItem = async (req, res) => {
   if (!userUID || !token || !itemUniqueId) {
     res.status(400).json({
       success: false,
-      message: 'Please provide all data required.',
+      message: "Please provide all data required.",
       data: null,
     });
   } else {
@@ -262,20 +262,20 @@ exports.deleteSingleItem = async (req, res) => {
       if (!jwt.verify(token, process.env.JWT_SECRET)) {
         res.status(501).json({
           success: false,
-          message: 'Token not valid.',
+          message: "Token not valid.",
           data: null,
         });
       } else {
         await DeleteItem(userUID, itemUniqueId);
         res.status(200).json({
           success: true,
-          message: 'Item deleted successfully.',
+          message: "Item deleted successfully.",
         });
       }
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: 'Something went wrong deleting item details.',
+        message: "Something went wrong deleting item details.",
         data: error,
       });
     }
