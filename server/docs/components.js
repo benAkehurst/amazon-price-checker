@@ -142,6 +142,42 @@ module.exports = {
           },
         },
       },
+      createUser: {
+        type: "object",
+        properties: {
+          firstName: {
+            type: "string",
+            description: "User's first name.",
+            example: "John",
+          },
+          lastName: {
+            type: "string",
+            description: "User's last name.",
+            example: "Doe",
+          },
+          email: {
+            type: "string",
+            description: "User's email address.",
+            example: "john@doe.com",
+          },
+          password: {
+            type: "string",
+            description:
+              "Password for user account. password must be at least 6 characters long and contain a lowercase letter, an uppercase letter, a numeric digit and a special character.",
+            example: "Abc123!@",
+          },
+          password2: {
+            type: "string",
+            description: "A repeat of the first password",
+            example: "Abc123!@",
+          },
+          acceptedTerms: {
+            type: "boolean",
+            description: "Confirms the user accepts t's & c's on sign up.",
+            example: "true",
+          },
+        },
+      },
     },
   },
 };
