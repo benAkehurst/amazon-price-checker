@@ -30,7 +30,7 @@ const fetchItemInfo = async (url) => {
         .replace(/\r?\n|\r/g, "")
         .replace(/£/g, "")
     ).toFixed(2);
-    item.image = $(el).find("#imgTagWrapperId").children("img").attr("src");
+    item.imgUrl = $(el).find("#imgTagWrapperId").children("img").attr("src");
     item.rating = $(el).find(".a-icon-alt").text();
   });
   return item;
