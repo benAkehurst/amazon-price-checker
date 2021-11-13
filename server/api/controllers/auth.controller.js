@@ -187,7 +187,7 @@ exports.create_new_user = async (req, res) => {
         data: userFiltered,
       });
     } catch {
-      res.status(400).json({
+      res.status(500).json({
         success: false,
         message: "General Error Creating new account",
         data: null,

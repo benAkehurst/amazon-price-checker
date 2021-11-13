@@ -6,6 +6,8 @@ const cors = require('cors');
 const morgan = require('morgan');
 const winston = require('./config/winston');
 const helmet = require('helmet');
+const swaggerUI = require('swagger-ui-express');
+const docs = require('./docs');
 
 // Models Imports
 const User = require('./api/models/user.model');
@@ -59,6 +61,9 @@ app.use((req, res, next) => {
 });
 app.use(cors());
 
+// SwaggerUI Setup
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(docs));
+
 // Routes Definitions
 const authRoutes = require('./api/routes/auth.routes');
 const scraperRoutes = require('./api/routes/scraper.routes');
@@ -75,5 +80,7 @@ app.use((req, res) => {
 
 // Server Port Controls
 server.listen(process.env.PORT, () =>
-  console.log(`API running on localhost:${process.env.PORT}`)
+  console.log(
+    `API running on localhost:${process.env.PORT} \nAPI docs - http://localhost:${process.env.PORT}/api-docs`
+  )
 );

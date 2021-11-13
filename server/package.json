@@ -45,6 +45,7 @@
     "morgan": "^1.10.0",
     "node-cron": "^2.0.3",
     "nodemailer": "^6.6.5",
+    "swagger-ui-express": "^4.1.6",
     "uuid": "^8.3.2",
     "winston": "^3.3.3"
   }
