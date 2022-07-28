@@ -41,7 +41,7 @@
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.20",
     "mongo-sanitize": "^1.1.0",
-    "mongoose": "^6.0.7",
+    "mongoose": "^6.4.6",
     "morgan": "^1.10.0",
     "node-cron": "^2.0.3",
     "nodemailer": "^6.6.5",
